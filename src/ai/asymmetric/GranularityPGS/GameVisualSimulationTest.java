@@ -34,6 +34,7 @@ import ai.asymmetric.GAB.SandBox.GAB_SandBox_Parcial_State;
 import ai.asymmetric.PGS.SandBox.PGSmRTS_Paralel_JulianTest;
 import ai.asymmetric.PGS.SandBox.PGSmRTS_Paralel_SandBox;
 import ai.asymmetric.PGS.SandBox.PGSmRTS_SandBox;
+import ai.asymmetric.PGS.PGSmRTS;
 import ai.asymmetric.SAB.SAB;
 import ai.asymmetric.SAB.SAB_seed;
 import ai.asymmetric.SSS.NSSS;
@@ -144,7 +145,7 @@ public class GameVisualSimulationTest {
         //AI ai1 = new POLightRush(utt);
         //AI ai1 = new WorkerRush(utt);
         //AI ai1 = new PGSmRTS_SandBox(utt);
-        AI ai1 = new PGSmRTS(utt); 
+        AI ai1 = new GranularityPGSLimit(utt); 
         //AI ai1 = new GAB(utt);
         //AI ai1 = new SAB(utt);
         //AI ai1 = new IDABCD(utt);
