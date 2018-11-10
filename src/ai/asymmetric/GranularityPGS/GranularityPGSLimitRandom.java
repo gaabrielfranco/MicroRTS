@@ -5,6 +5,7 @@
  */
 package ai.asymmetric.GranularityPGS;
 
+import ai.RandomBiasedAI;
 import ai.abstraction.partialobservability.POHeavyRush;
 import ai.abstraction.partialobservability.POLightRush;
 import ai.abstraction.partialobservability.PORangedRush;
@@ -29,9 +30,9 @@ import rts.units.UnitTypeTable;
 
 /**
  *
- * @author rubens
+ * @author Gabriel Franco and rubens
  */
-public class GranularityPGSLimit extends AIWithComputationBudget implements InterruptibleAI{
+public class GranularityPGSLimitRandom extends AIWithComputationBudget implements InterruptibleAI{
     
     int LOOKAHEAD = 200;
     int I = 1;  // number of iterations for improving a given player
@@ -51,9 +52,12 @@ public class GranularityPGSLimit extends AIWithComputationBudget implements Inte
     GameState gs_to_start_from = null;
     int playerForThisComputation;
     double _bestScore;
+    
+    AI randAI = null;
+    int qtdSumPlayout = 2;
 
-    public GranularityPGSLimit(UnitTypeTable utt) {
-        this(100, -1, 200, 2, 2, 
+    public GranularityPGSLimitRandom(UnitTypeTable utt) {
+        this(100, -1, 200, 1, 1, 
              new SimpleSqrtEvaluationFunction3(),
              //new SimpleSqrtEvaluationFunction2(),
              //new LanchesterEvaluationFunction(),
@@ -61,7 +65,7 @@ public class GranularityPGSLimit extends AIWithComputationBudget implements Inte
              new AStarPathFinding());
     }
     
-    public GranularityPGSLimit(int time, int max_playouts, int la, int a_I, int a_R, EvaluationFunction e, UnitTypeTable a_utt, PathFinding a_pf) {
+    public GranularityPGSLimitRandom(int time, int max_playouts, int la, int a_I, int a_R, EvaluationFunction e, UnitTypeTable a_utt, PathFinding a_pf) {
         super(time, max_playouts);
         
         LOOKAHEAD = la;
@@ -73,13 +77,14 @@ public class GranularityPGSLimit extends AIWithComputationBudget implements Inte
         defaultScript = new POLightRush(a_utt);
         scripts = new ArrayList<>();
         buildPortfolio(); 
+        randAI = new RandomBiasedAI(utt);
     }
     
     protected void buildPortfolio(){
-        this.scripts.add(new POWorkerRush(utt));
         this.scripts.add(new POLightRush(utt));
+        this.scripts.add(new POHeavyRush(utt));
         this.scripts.add(new PORangedRush(utt));
-        
+        this.scripts.add(new POWorkerRush(utt));
         
         //this.scripts.add(new POHeavyRush(utt, new FloodFillPathFinding()));
         //this.scripts.add(new POLightRush(utt, new FloodFillPathFinding()));
@@ -131,6 +136,25 @@ public class GranularityPGSLimit extends AIWithComputationBudget implements Inte
         
     }
     
+    public UnitScriptData continueImproveUnitScript(int player, GameState gs, UnitScriptData currentScriptData) throws Exception {
+        startNewComputation(player,gs);
+        
+        //pego o melhor script do portfolio para ser a semente
+        AI seedPlayer = getSeedPlayer(playerForThisComputation);
+        AI seedEnemy = getSeedPlayer(1-playerForThisComputation);
+        
+        defaultScript = seedPlayer;
+        enemyScript = seedEnemy;
+        
+        currentScriptData.setSeedUnits(seedPlayer);
+        
+        if( (System.currentTimeMillis()-start_time ) < TIME_BUDGET){
+           currentScriptData = doPortfolioSearch(playerForThisComputation, currentScriptData, seedEnemy);
+        }
+        
+        return currentScriptData;
+    }
+    
     public UnitScriptData getBestUnitScriptSoFar() throws Exception {
 
         //pego o melhor script do portfolio para ser a semente
@@ -144,7 +168,7 @@ public class GranularityPGSLimit extends AIWithComputationBudget implements Inte
         currentScriptData.setSeedUnits(seedPlayer);
         setAllScripts(playerForThisComputation, currentScriptData, seedPlayer);
         if( (System.currentTimeMillis()-start_time ) < TIME_BUDGET){
-            doPortfolioSearch(playerForThisComputation, currentScriptData, seedEnemy);
+           currentScriptData = doPortfolioSearch(playerForThisComputation, currentScriptData, seedEnemy);
         }
         
         return currentScriptData;
@@ -202,32 +226,28 @@ public class GranularityPGSLimit extends AIWithComputationBudget implements Inte
      * @throws Exception 
      */
     public double eval(int player, GameState gs, UnitScriptData uScriptPlayer, AI aiEnemy) throws Exception{
-        //AI ai1 = defaultScript.clone();
         AI ai2 = aiEnemy.clone();
-        
-        GameState gs2 = gs.clone();
-        //ai1.reset();
         ai2.reset();
+        GameState gs2 = gs.clone();
+        gs2.issue(uScriptPlayer.getAction(player, gs2));
+        gs2.issue(ai2.getAction(1 - player, gs2));
         int timeLimit = gs2.getTime() + LOOKAHEAD;
         boolean gameover = false;
-        while(!gameover && gs2.getTime()<timeLimit) {
+        while (!gameover && gs2.getTime() < timeLimit) {
             if (gs2.isComplete()) {
                 gameover = gs2.cycle();
             } else {
-                //gs2.issue(ai1.getAction(player, gs2));
-                gs2.issue(uScriptPlayer.getAction(player, gs2));
-                //
-                gs2.issue(ai2.getAction(1-player, gs2));
+                gs2.issue(randAI.getAction(player, gs2));
+                gs2.issue(randAI.getAction(1 - player, gs2));
             }
-        } 
-        
+        }
         
         return evaluation.evaluate(player, 1-player, gs2);
     }
     
     @Override
     public AI clone() {
-        return new GranularityPGSLimit(TIME_BUDGET, ITERATIONS_BUDGET, LOOKAHEAD, I, R, evaluation, utt, pf);
+        return new GranularityPGSLimitRandom(TIME_BUDGET, ITERATIONS_BUDGET, LOOKAHEAD, I, R, evaluation, utt, pf);
     }
 
     @Override
@@ -345,10 +365,13 @@ public class GranularityPGSLimit extends AIWithComputationBudget implements Inte
         
         int counterIterations = 0;
         //controle pelo número de iterações
-        for (int i = 0; i < I; i++) {
+        while (System.currentTimeMillis() < (start_time + (TIME_BUDGET - 8))) {
             boolean hasImproved = false;
             //fazer o improve de cada unidade
             for (Unit unit : unitsPlayer) {
+            	//List<UnitAction> allActions = unit.getUnitActions(gs_to_start_from);
+            	//System.out.println(unit + " " + allActions);
+            	
                 //inserir controle de tempo
                 if(System.currentTimeMillis() >= (start_time + (TIME_BUDGET-10))  ){
                     return currentScriptData;
@@ -356,12 +379,15 @@ public class GranularityPGSLimit extends AIWithComputationBudget implements Inte
                 //iterar sobre cada script do portfolio
                 for(AI ai : scripts){
                     currentScriptData.setUnitScript(unit, ai);
-                    double scoreTemp = eval(player, gs_to_start_from, currentScriptData, seedEnemy);
+                    double sum = 0.0;
+                    for (int j = 0; j < qtdSumPlayout; j++) {
+                        sum += eval(player, gs_to_start_from, currentScriptData, seedEnemy);
+                    }
+                    double scoreTemp = sum / qtdSumPlayout;
                     
                     if(scoreTemp > bestScore){
                         bestScriptData = currentScriptData.clone();
                         bestScore = scoreTemp;
-                        
                     }
                     if( (counterIterations == 0 && scripts.get(0)==ai) || scoreTemp > _bestScore  ){
                         _bestScore = bestScore;
@@ -372,11 +398,19 @@ public class GranularityPGSLimit extends AIWithComputationBudget implements Inte
                 currentScriptData = bestScriptData.clone();
             }
             if(!hasImproved){
+            	Unit unitImprove = unitsPlayer.get(0);
+            	for(int i = 1; i < unitsPlayer.size(); i++)
+            	{
+            		if (unitsPlayer.get(i).getHitPoints() < unitImprove.getHitPoints())
+            		{
+            			unitImprove = unitsPlayer.get(i);
+            		}
+            	}
+            	System.out.println(unitImprove);
                 return currentScriptData;
             }
             counterIterations++;
         }
-        
         return currentScriptData;
     }
 
