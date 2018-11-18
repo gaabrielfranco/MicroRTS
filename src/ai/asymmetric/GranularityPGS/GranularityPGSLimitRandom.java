@@ -22,6 +22,9 @@ import ai.evaluation.SimpleSqrtEvaluationFunction3;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+//import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Collections;
+import java.util.Collections;
 import rts.GameState;
 import rts.PlayerAction;
 import rts.UnitAction;
@@ -398,6 +401,8 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
                 currentScriptData = bestScriptData.clone();
             }
             if(!hasImproved){
+            	
+            	// Escolho a unidade a ser melhorada (se possível)
             	Unit unitImprove = unitsPlayer.get(0);
             	for(int i = 1; i < unitsPlayer.size(); i++)
             	{
@@ -406,7 +411,11 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
             			unitImprove = unitsPlayer.get(i);
             		}
             	}
-            	System.out.println(unitImprove);
+            	// Pego todas as ações desta unidade
+            	List<UnitAction> actions = unitImprove.getUnitActions(gs_to_start_from);
+            	Collections.shuffle(actions);
+            	//System.out.println("A unidade " + unitImprove + "possui as seguintes ações: "  + actions);
+            	
                 return currentScriptData;
             }
             counterIterations++;
