@@ -26,10 +26,10 @@ public class LightRush extends AbstractionLayerAI {
 
     Random r = new Random();
     protected UnitTypeTable utt;
-    UnitType workerType;
-    UnitType baseType;
-    UnitType barracksType;
-    UnitType lightType;
+    protected UnitType workerType;
+    protected UnitType baseType;
+    protected UnitType barracksType;
+    protected UnitType lightType;
 
     // Strategy implemented by this class:
     // If we have any "light": send it to attack to the nearest enemy unit

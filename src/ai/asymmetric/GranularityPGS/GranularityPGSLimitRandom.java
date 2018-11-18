@@ -8,6 +8,7 @@ package ai.asymmetric.GranularityPGS;
 import ai.RandomBiasedAI;
 import ai.abstraction.partialobservability.POHeavyRush;
 import ai.abstraction.partialobservability.POLightRush;
+import ai.abstraction.partialobservability.POLightRushGabriel;
 import ai.abstraction.partialobservability.PORangedRush;
 import ai.abstraction.partialobservability.POWorkerRush;
 import ai.abstraction.pathfinding.AStarPathFinding;
@@ -414,8 +415,9 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
             	// Pego todas as ações desta unidade
             	List<UnitAction> actions = unitImprove.getUnitActions(gs_to_start_from);
             	Collections.shuffle(actions);
-            	//System.out.println("A unidade " + unitImprove + "possui as seguintes ações: "  + actions);
-            	
+            	System.out.println("A unidade " + unitImprove + "possui as seguintes ações: "  + actions);
+            	//AI teste = new POLightRushGabriel(utt, gs_to_start_from, unitImprove, actions.get(0));
+            	//currentScriptData.setUnitScript(unitImprove, teste);
                 return currentScriptData;
             }
             counterIterations++;
