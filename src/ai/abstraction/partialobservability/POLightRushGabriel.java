@@ -38,6 +38,7 @@ public class POLightRushGabriel extends LightRush {
     
     public POLightRushGabriel(UnitTypeTable a_utt, GameState gs, Unit u, UnitAction a) {
     	this(a_utt, new AStarPathFinding());
+
     	gameState = gs;
     	unit = u;
     	action = a;
@@ -62,13 +63,13 @@ public class POLightRushGabriel extends LightRush {
         PhysicalGameState pgs = gs.getPhysicalGameState();
         Unit closestEnemy = null;
         int closestDistance = 0;
-        
-        if (unit == u && gameState == gs && unit.canExecuteAction(action, gameState))
+        System.out.println("meleeUnitBehavior");
+        /*if (unit == u && gameState == gs && unit.canExecuteAction(action, gameState))
         {
-        	System.out.println("Executou a ação nesse estado");
-        	action.execute(unit, gs);
-        	return;
-        }
+        	System.out.println("meleeUnitBehavior");
+        	//action.execute(unit, gs);
+        	//return;
+        }*/
         
         for (Unit u2 : pgs.getUnits()) {
             if (u2.getPlayer() >= 0 && u2.getPlayer() != p.getID()) {
