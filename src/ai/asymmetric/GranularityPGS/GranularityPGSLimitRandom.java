@@ -21,7 +21,7 @@ import ai.core.ParameterSpecification;
 import ai.evaluation.EvaluationFunction;
 import ai.evaluation.SimpleSqrtEvaluationFunction3;
 import util.Pair;
-
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -91,6 +91,8 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
         this.scripts.add(new POHeavyRush(utt));
         this.scripts.add(new PORangedRush(utt));
         this.scripts.add(new POWorkerRush(utt));
+        
+        //this.scripts.add(new POLightRushGabriel(utt));
         
         //this.scripts.add(new POHeavyRush(utt, new FloodFillPathFinding()));
         //this.scripts.add(new POLightRush(utt, new FloodFillPathFinding()));
@@ -392,9 +394,6 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
     }
 
     private UnitScriptData doPortfolioSearch(int player, UnitScriptData currentScriptData, AI seedEnemy) throws Exception {
-    	List<AI> teste;
-    	teste = new ArrayList<>();
-    	
     	int enemy = 1-player;
         
         UnitScriptData bestScriptData = currentScriptData.clone();
@@ -438,45 +437,26 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
             if(!hasImproved){
             	
             	// Escolho a unidade a ser melhorada (se possível)
-            	/*Unit unitImprove = unitsPlayer.get(0);
+            	Unit unitImprove = unitsPlayer.get(0);
             	for(int i = 1; i < unitsPlayer.size(); i++)
             	{
             		if (unitsPlayer.get(i).getHitPoints() < unitImprove.getHitPoints())
             		{
             			unitImprove = unitsPlayer.get(i);
             		}
-            	}*/
-            	//Escolho a unidade a ser melhorada (se possível)
-            	PlayerAction p = currentScriptData.getAction(player, gs_to_start_from);
-            	List<Pair<Unit, UnitAction>> lista_teste = p.getActions();
-            	Unit unitImprove = lista_teste.get(0).m_a;
-            	for(Pair<Unit, UnitAction> u: lista_teste)
-            	{
-            		if (u.m_a.getHitPoints() < unitImprove.getHitPoints())
-            		{
-            			unitImprove = u.m_a;
-            		}
             	}
             	
             	// Pego todas as ações desta unidade
             	List<UnitAction> actions = unitImprove.getUnitActions(gs_to_start_from);
-            	Collections.shuffle(actions);
-            	System.out.println("A unidade " + unitImprove + "possui as seguintes ações: "  + actions);
-            	//teste.add(new POLightRushGabriel(utt, gs_to_start_from, unitImprove, actions.get(0)));
+            	int randomPosition = ThreadLocalRandom.current().nextInt(0, actions.size());
+            	//System.out.println("A unidade " + unitImprove + "possui as seguintes ações: "  + actions);
+            	AI newScript = new POLightRushGabriel(utt, gs_to_start_from, unitImprove, actions.get(randomPosition));
+            	//System.out.println("teste size = " + Integer.toString(teste.size() - 1));
             	//teste.add(new POLightRushGabriel(utt));
             	//teste.add(new POLightRush(utt));
             	//System.out.println("IA = " + teste.get(teste.size() - 1) + "\n");
-            	//currentScriptData.setUnitScript(unitImprove, teste.get(teste.size() - 1));
-            	for(Pair<Unit, UnitAction> x: lista_teste)
-            	{
-            		if (x.m_a.getID() == unitImprove.getID())
-            		{
-            			p.removeUnitAction(x.m_a, x.m_b);
-            			p.addUnitAction(x.m_a, actions.get(0));
-            			double score_teste = eval(player, gs_to_start_from, p, seedEnemy);
-            			System.out.println(score_teste);
-            		}
-            	}
+            	currentScriptData.setUnitScript(unitImprove, newScript);
+            	scripts.add(newScript);
                 //return currentScriptData;
             }
             counterIterations++;

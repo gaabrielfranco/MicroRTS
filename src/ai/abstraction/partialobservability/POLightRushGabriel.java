@@ -63,7 +63,7 @@ public class POLightRushGabriel extends LightRush {
         PhysicalGameState pgs = gs.getPhysicalGameState();
         Unit closestEnemy = null;
         int closestDistance = 0;
-        System.out.println("meleeUnitBehavior");
+        //System.out.println("meleeUnitBehavior");
         /*if (unit == u && gameState == gs && unit.canExecuteAction(action, gameState))
         {
         	System.out.println("meleeUnitBehavior");
@@ -108,7 +108,7 @@ public class POLightRushGabriel extends LightRush {
     
     @Override
     public void baseBehavior(Unit u, Player p, PhysicalGameState pgs) {
-    	System.out.println("baseBehavior");
+    	//System.out.println("baseBehavior");
 
         int nworkers = 0;
         for (Unit u2 : pgs.getUnits()) {
@@ -124,7 +124,7 @@ public class POLightRushGabriel extends LightRush {
     
     @Override
     public void barracksBehavior(Unit u, Player p, PhysicalGameState pgs) {
-    	System.out.println("barracksBehavior");
+    	//System.out.println("barracksBehavior");
         if (p.getResources() >= lightType.cost) {
             super.train(u, lightType);
         }
@@ -132,7 +132,7 @@ public class POLightRushGabriel extends LightRush {
     
     @Override
     public void workersBehavior(List<Unit> workers, Player p, PhysicalGameState pgs) {
-    	System.out.println("workersBehavior");
+    	//System.out.println("workersBehavior");
         int nbases = 0;
         int nbarracks = 0;
 
