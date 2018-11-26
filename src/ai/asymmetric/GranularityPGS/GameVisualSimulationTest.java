@@ -246,7 +246,7 @@ public class GameVisualSimulationTest {
                 startTime = System.currentTimeMillis();
                 PlayerAction pa1 = ai1.getAction(0, gs);  
                 if( (System.currentTimeMillis() - startTime) >0){
-                //System.out.println("Tempo de execução P1="+(startTime = System.currentTimeMillis() - startTime));
+                	//System.out.println("Tempo de execução P1="+(startTime = System.currentTimeMillis() - startTime));
                 }
                 //System.out.println("Action A1 ="+ pa1.toString());
                 

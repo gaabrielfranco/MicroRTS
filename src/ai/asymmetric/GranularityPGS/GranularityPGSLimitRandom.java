@@ -108,6 +108,8 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
 
     @Override
     public PlayerAction getAction(int player, GameState gs) throws Exception {
+    	scripts.clear();
+    	buildPortfolio();
        if (gs.canExecuteAnyAction(player)) {
             startNewComputation(player,gs);
             return getBestActionSoFar();
@@ -238,35 +240,6 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
         ai2.reset();
         GameState gs2 = gs.clone();
         gs2.issue(uScriptPlayer.getAction(player, gs2));
-        gs2.issue(ai2.getAction(1 - player, gs2));
-        int timeLimit = gs2.getTime() + LOOKAHEAD;
-        boolean gameover = false;
-        while (!gameover && gs2.getTime() < timeLimit) {
-            if (gs2.isComplete()) {
-                gameover = gs2.cycle();
-            } else {
-                gs2.issue(randAI.getAction(player, gs2));
-                gs2.issue(randAI.getAction(1 - player, gs2));
-            }
-        }
-        
-        return evaluation.evaluate(player, 1-player, gs2);
-    }
-    
-    /**
-     * Realiza um playout (Dave playout) para calcular o improve baseado no player action.
-     * @param player
-     * @param gs
-     * @param uScriptPlayer
-     * @param aiEnemy
-     * @return a avaliação para ser utilizada como base. 
-     * @throws Exception 
-     */
-    public double eval(int player, GameState gs, PlayerAction pa, AI aiEnemy) throws Exception{
-        AI ai2 = aiEnemy.clone();
-        ai2.reset();
-        GameState gs2 = gs.clone();
-        gs2.issue(pa);
         gs2.issue(ai2.getAction(1 - player, gs2));
         int timeLimit = gs2.getTime() + LOOKAHEAD;
         boolean gameover = false;
@@ -435,7 +408,11 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
                 currentScriptData = bestScriptData.clone();
             }
             if(!hasImproved){
-            	
+            	// Controle de tempo
+            	if(System.currentTimeMillis() >= (start_time + (TIME_BUDGET-10))  ){
+                    return currentScriptData;
+                }
+       
             	// Escolho a unidade a ser melhorada (se possível)
             	Unit unitImprove = unitsPlayer.get(0);
             	for(int i = 1; i < unitsPlayer.size(); i++)
@@ -449,15 +426,22 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
             	// Pego todas as ações desta unidade
             	List<UnitAction> actions = unitImprove.getUnitActions(gs_to_start_from);
             	int randomPosition = ThreadLocalRandom.current().nextInt(0, actions.size());
-            	//System.out.println("A unidade " + unitImprove + "possui as seguintes ações: "  + actions);
             	AI newScript = new POLightRushGabriel(utt, gs_to_start_from, unitImprove, actions.get(randomPosition));
-            	//System.out.println("teste size = " + Integer.toString(teste.size() - 1));
-            	//teste.add(new POLightRushGabriel(utt));
-            	//teste.add(new POLightRush(utt));
-            	//System.out.println("IA = " + teste.get(teste.size() - 1) + "\n");
-            	currentScriptData.setUnitScript(unitImprove, newScript);
-            	scripts.add(newScript);
-                //return currentScriptData;
+            	UnitScriptData newScriptData = currentScriptData.clone();
+            	newScriptData.setUnitScript(unitImprove, newScript);
+            	
+            	double sum = 0.0;
+                for (int j = 0; j < qtdSumPlayout; j++) {
+                    sum += eval(player, gs_to_start_from, newScriptData, seedEnemy);
+                }
+                double scoreTemp = sum / qtdSumPlayout;
+            	if (scoreTemp > bestScore)
+            	{
+            		System.out.println("Melhorou");
+            		currentScriptData = newScriptData.clone();
+            		scripts.add(newScript);
+            	}
+                return currentScriptData;
             }
             counterIterations++;
         }

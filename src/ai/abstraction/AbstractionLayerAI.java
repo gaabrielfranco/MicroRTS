@@ -116,6 +116,10 @@ public abstract class AbstractionLayerAI extends AIWithComputationBudget {
     public AbstractAction getAbstractAction(Unit u) {
         return actions.get(u);
     }
+    
+    public void addAction(Unit u, UnitAction ua) {
+        actions.put(u, new ExecuteAction(u, ua));
+    }
 
     public void move(Unit u, int x, int y) {
         actions.put(u, new Move(u, x, y, pf));
