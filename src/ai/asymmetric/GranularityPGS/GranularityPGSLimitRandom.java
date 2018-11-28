@@ -435,7 +435,7 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
                     sum += eval(player, gs_to_start_from, newScriptData, seedEnemy);
                 }
                 double scoreTemp = sum / qtdSumPlayout;
-            	if (scoreTemp > bestScore)
+            	if (scoreTemp > _bestScore)
             	{
             		System.out.println("Melhorou");
             		currentScriptData = newScriptData.clone();
