@@ -1,5 +1,5 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
+  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
@@ -369,13 +369,17 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
 
 	public class UnitComparator implements Comparator<Unit> {
 		public int compare(Unit arg0, Unit arg1) {
-			if (arg0.getHitPoints() < arg1.getHitPoints())
-			{
-				return -1;
-			}
-			else if (arg0.getHitPoints() > arg1.getHitPoints()) 
+			
+			double DPSunit0 = ((double) arg0.getMaxDamage() / (double) arg0.getAttackTime()) / arg0.getHitPoints();
+			double DPSunit1 = ((double) arg1.getMaxDamage() / (double) arg1.getAttackTime()) / arg1.getHitPoints();
+			
+			if (DPSunit0 < DPSunit1)
 			{
 				return 1;
+			}
+			else if (DPSunit0 > DPSunit1) 
+			{
+				return -1;
 			}
 			else
 			{
@@ -431,26 +435,19 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
                     return currentScriptData;
                 }
        
-            	// Escolho a unidade a ser melhorada (se possível)
+            	// Ordeno as unidades pelo critério que quero usar pra melhorar (ordem decrescente)
             	unitsPlayer.sort(new UnitComparator());
-            	//Unit unitImprove = unitsPlayer.get(0);
-            	/*for(int i = 1; i < unitsPlayer.size(); i++)
-            	{
-            		if (unitsPlayer.get(i).getHitPoints() <= unitImprove.getHitPoints())
-            		{
-            			unitImprove = unitsPlayer.get(i);
-            		}
-            	}*/
-            	
-            	// Pego todas as ações desta unidade
-            	
-            	int i = 0;
+            	int iterations = 0;
             	//HashMap<Unit, List<UnitAction>> unitActionsMap = new HashMap<Unit, List<UnitAction>>();
+            	
             	while (System.currentTimeMillis() < (start_time + (TIME_BUDGET - 8))) {
-            		Unit unitImprove = unitsPlayer.get(i);
+            		// Pega a unidade que vai ser melhorada e as ações dela
+            		Unit unitImprove = unitsPlayer.get(iterations);
             		List<UnitAction> actions = unitImprove.getUnitActions(gs_to_start_from);
+            		// Cria um script que retorna uma ação aleatória nessa game state
 	            	int randomPos = ThreadLocalRandom.current().nextInt(0, actions.size());
 	            	AI newScript = new POLightRushGabriel(utt, gs_to_start_from, unitImprove, actions.get(randomPos));
+	            	// Seto o novo script que vai ser testado
 	            	UnitScriptData newScriptData = currentScriptData.clone();
 	            	newScriptData.setUnitScript(unitImprove, newScript);
 	            	
@@ -466,8 +463,8 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
 	            		scripts.add(newScript);
 	            		_bestScore = scoreTemp;
 	            	}
-	            	i = (i + 1) % unitsPlayer.size();
-	            	if (i == 0)
+	            	iterations = (iterations + 1) % unitsPlayer.size();
+	            	if (iterations == 0)
 	            	{
 	            		//System.out.println("Voltô\n");
 	            	}
