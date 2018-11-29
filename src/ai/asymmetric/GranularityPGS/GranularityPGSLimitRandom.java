@@ -20,19 +20,19 @@ import ai.core.InterruptibleAI;
 import ai.core.ParameterSpecification;
 import ai.evaluation.EvaluationFunction;
 import ai.evaluation.SimpleSqrtEvaluationFunction3;
-import util.Pair;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 //import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Collections;
-import java.util.Collections;
 import rts.GameState;
 import rts.PlayerAction;
 import rts.UnitAction;
 import rts.units.Unit;
 import rts.units.UnitTypeTable;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  *
@@ -365,6 +365,24 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
             }
         }
     }
+    
+
+	public class UnitComparator implements Comparator<Unit> {
+		public int compare(Unit arg0, Unit arg1) {
+			if (arg0.getHitPoints() < arg1.getHitPoints())
+			{
+				return -1;
+			}
+			else if (arg0.getHitPoints() > arg1.getHitPoints()) 
+			{
+				return 1;
+			}
+			else
+			{
+				return 0;
+			}
+		}
+	}
 
     private UnitScriptData doPortfolioSearch(int player, UnitScriptData currentScriptData, AI seedEnemy) throws Exception {
     	int enemy = 1-player;
@@ -414,32 +432,45 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
                 }
        
             	// Escolho a unidade a ser melhorada (se possível)
-            	Unit unitImprove = unitsPlayer.get(0);
-            	for(int i = 1; i < unitsPlayer.size(); i++)
+            	unitsPlayer.sort(new UnitComparator());
+            	//Unit unitImprove = unitsPlayer.get(0);
+            	/*for(int i = 1; i < unitsPlayer.size(); i++)
             	{
-            		if (unitsPlayer.get(i).getHitPoints() < unitImprove.getHitPoints())
+            		if (unitsPlayer.get(i).getHitPoints() <= unitImprove.getHitPoints())
             		{
             			unitImprove = unitsPlayer.get(i);
             		}
-            	}
+            	}*/
             	
             	// Pego todas as ações desta unidade
-            	List<UnitAction> actions = unitImprove.getUnitActions(gs_to_start_from);
-            	int randomPosition = ThreadLocalRandom.current().nextInt(0, actions.size());
-            	AI newScript = new POLightRushGabriel(utt, gs_to_start_from, unitImprove, actions.get(randomPosition));
-            	UnitScriptData newScriptData = currentScriptData.clone();
-            	newScriptData.setUnitScript(unitImprove, newScript);
             	
-            	double sum = 0.0;
-                for (int j = 0; j < qtdSumPlayout; j++) {
-                    sum += eval(player, gs_to_start_from, newScriptData, seedEnemy);
-                }
-                double scoreTemp = sum / qtdSumPlayout;
-            	if (scoreTemp > _bestScore)
-            	{
-            		System.out.println("Melhorou");
-            		currentScriptData = newScriptData.clone();
-            		scripts.add(newScript);
+            	int i = 0;
+            	//HashMap<Unit, List<UnitAction>> unitActionsMap = new HashMap<Unit, List<UnitAction>>();
+            	while (System.currentTimeMillis() < (start_time + (TIME_BUDGET - 8))) {
+            		Unit unitImprove = unitsPlayer.get(i);
+            		List<UnitAction> actions = unitImprove.getUnitActions(gs_to_start_from);
+	            	int randomPos = ThreadLocalRandom.current().nextInt(0, actions.size());
+	            	AI newScript = new POLightRushGabriel(utt, gs_to_start_from, unitImprove, actions.get(randomPos));
+	            	UnitScriptData newScriptData = currentScriptData.clone();
+	            	newScriptData.setUnitScript(unitImprove, newScript);
+	            	
+	            	double sum = 0.0;
+	                for (int j = 0; j < qtdSumPlayout; j++) {
+	                    sum += eval(player, gs_to_start_from, newScriptData, seedEnemy);
+	                }
+	                double scoreTemp = sum / qtdSumPlayout;
+	            	if (scoreTemp > _bestScore)
+	            	{
+	            		//System.out.println("Melhorou");
+	            		currentScriptData = newScriptData.clone();
+	            		scripts.add(newScript);
+	            		_bestScore = scoreTemp;
+	            	}
+	            	i = (i + 1) % unitsPlayer.size();
+	            	if (i == 0)
+	            	{
+	            		//System.out.println("Voltô\n");
+	            	}
             	}
                 return currentScriptData;
             }

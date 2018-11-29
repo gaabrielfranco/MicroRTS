@@ -5,8 +5,10 @@
  */
 package ai.abstraction.partialobservability;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import ai.abstraction.AbstractAction;
 import ai.abstraction.Harvest;
@@ -30,7 +32,7 @@ public class POLightRushGabriel extends LightRush {
 	
 	GameState gameState;
 	Unit unit;
-	UnitAction action;
+	UnitAction possibleActions;
 
     public POLightRushGabriel(UnitTypeTable a_utt) {
         this(a_utt, new AStarPathFinding());
@@ -41,7 +43,7 @@ public class POLightRushGabriel extends LightRush {
 
     	gameState = gs;
     	unit = u;
-    	action = a;
+    	possibleActions = a;
     }
     
     
@@ -63,11 +65,12 @@ public class POLightRushGabriel extends LightRush {
         PhysicalGameState pgs = gs.getPhysicalGameState();
         Unit closestEnemy = null;
         int closestDistance = 0;
-
-        if (unit == u && gameState == gs && unit.canExecuteAction(action, gameState))
+        
+        if (unit == u && gameState == gs)
         {
         	//System.out.println("meleeUnitBehavior");
-        	addAction(u, action);
+        	
+        	addAction(u, possibleActions);
         	return;
         }
         
@@ -108,10 +111,11 @@ public class POLightRushGabriel extends LightRush {
     
     @Override
     public void baseBehavior(Unit u, Player p, PhysicalGameState pgs) {
-        if (unit == u && gameState.getPhysicalGameState() == pgs && unit.canExecuteAction(action, gameState))
+        if (unit == u && gameState.getPhysicalGameState() == pgs)
         {
         	//System.out.println("baseBehavior");
-        	addAction(u, action);
+        	
+        	addAction(u, possibleActions);
         	return;
         }
 
@@ -129,10 +133,9 @@ public class POLightRushGabriel extends LightRush {
     
     @Override
     public void barracksBehavior(Unit u, Player p, PhysicalGameState pgs) {
-        if (unit == u && gameState.getPhysicalGameState() == pgs && unit.canExecuteAction(action, gameState))
+        if (unit == u && gameState.getPhysicalGameState() == pgs)
         {
-        	System.out.println("barracksBehavior");
-        	addAction(u, action);
+        	addAction(u, possibleActions);
         	return;
         }
         if (p.getResources() >= lightType.cost) {
@@ -142,7 +145,6 @@ public class POLightRushGabriel extends LightRush {
     
     @Override
     public void workersBehavior(List<Unit> workers, Player p, PhysicalGameState pgs) {
-        
         int nbases = 0;
         int nbarracks = 0;
 
@@ -152,6 +154,16 @@ public class POLightRushGabriel extends LightRush {
 
         if (workers.isEmpty()) {
             return;
+        }
+        
+        for(int i = 0; i < freeWorkers.size(); i++)
+        {
+        	Unit u = freeWorkers.get(i);
+        	if (unit == u && gameState.getPhysicalGameState() == pgs)
+            {
+            	addAction(u, possibleActions);
+            	freeWorkers.remove(i);
+            }
         }
 
         for (Unit u2 : pgs.getUnits()) {
@@ -215,15 +227,7 @@ public class POLightRushGabriel extends LightRush {
                     Harvest h_aa = (Harvest)aa;
                     if (h_aa.getTarget() != closestResource || h_aa.getBase()!=closestBase) harvest(u, closestResource, closestBase);
                 } else {
-                	if (unit == u && gameState.getPhysicalGameState() == pgs && unit.canExecuteAction(action, gameState))
-                    {
-                    	//System.out.println("workersBehavior");
-                    	addAction(u, action);
-                    }
-                	else
-                	{
-                		harvest(u, closestResource, closestBase);
-                	}
+                	harvest(u, closestResource, closestBase);
                 }
             }
         }
