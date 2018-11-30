@@ -25,8 +25,8 @@ import rts.units.*;
 public class WorkerRush extends AbstractionLayerAI {
     Random r = new Random();
     protected UnitTypeTable utt;
-    UnitType workerType;
-    UnitType baseType;
+    protected UnitType workerType;
+    protected UnitType baseType;
 
     // Strategy implemented by this class:
     // If we have more than 1 "Worker": send the extra workers to attack to the nearest enemy unit

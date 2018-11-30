@@ -5,14 +5,12 @@
  */
 package ai.abstraction.partialobservability;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
 import ai.abstraction.AbstractAction;
 import ai.abstraction.Harvest;
-import ai.abstraction.LightRush;
+import ai.abstraction.RangedRush;
 import ai.abstraction.pathfinding.AStarPathFinding;
 import ai.abstraction.pathfinding.PathFinding;
 import ai.core.AI;
@@ -26,41 +24,38 @@ import rts.units.UnitTypeTable;
 
 /**
  *
- * @author gabriel
+ * @author santi
  */
-public class POLightRushGabriel extends LightRush {
+public class PORangedRushV2 extends RangedRush {
 	
 	GameState gameState;
 	Unit unit;
-	UnitAction possibleActions;
+	UnitAction possibleAction;
 
-    public POLightRushGabriel(UnitTypeTable a_utt) {
+    public PORangedRushV2(UnitTypeTable a_utt) {
         this(a_utt, new AStarPathFinding());
     }
     
-    public POLightRushGabriel(UnitTypeTable a_utt, GameState gs, Unit u, UnitAction a) {
+    public PORangedRushV2(UnitTypeTable a_utt, GameState gs, Unit u, UnitAction a) {
     	this(a_utt, new AStarPathFinding());
 
     	gameState = gs;
     	unit = u;
-    	possibleActions = a;
+    	possibleAction = a;
     }
     
-    
-    public POLightRushGabriel(UnitTypeTable a_utt, PathFinding a_pf) {
+    public PORangedRushV2(UnitTypeTable a_utt, PathFinding a_pf) {
         super(a_utt, a_pf);
     }
-    
 
     public void reset() {
     	super.reset();
     }
 
     public AI clone() {
-        return new POLightRushGabriel(utt, pf);
+        return new PORangedRushV2(utt, pf);
     }
-    
-    @Override
+
     public void meleeUnitBehavior(Unit u, Player p, GameState gs) {
         PhysicalGameState pgs = gs.getPhysicalGameState();
         Unit closestEnemy = null;
@@ -68,9 +63,7 @@ public class POLightRushGabriel extends LightRush {
         
         if (unit == u && gameState == gs)
         {
-        	//System.out.println("meleeUnitBehavior");
-        	
-        	addAction(u, possibleActions);
+        	addAction(u, possibleAction);
         	return;
         }
         
@@ -109,16 +102,13 @@ public class POLightRushGabriel extends LightRush {
         }
     }
     
-    @Override
     public void baseBehavior(Unit u, Player p, PhysicalGameState pgs) {
         if (unit == u && gameState.getPhysicalGameState() == pgs)
         {
-        	//System.out.println("baseBehavior");
-        	
-        	addAction(u, possibleActions);
+        	addAction(u, possibleAction);
         	return;
         }
-
+        
         int nworkers = 0;
         for (Unit u2 : pgs.getUnits()) {
             if (u2.getType() == workerType
@@ -130,20 +120,19 @@ public class POLightRushGabriel extends LightRush {
             train(u, workerType);
         }
     }
-    
-    @Override
+
     public void barracksBehavior(Unit u, Player p, PhysicalGameState pgs) {
         if (unit == u && gameState.getPhysicalGameState() == pgs)
         {
-        	addAction(u, possibleActions);
+        	addAction(u, possibleAction);
         	return;
         }
-        if (p.getResources() >= lightType.cost) {
-            super.train(u, lightType);
+        
+        if (p.getResources() >= rangedType.cost) {
+            train(u, rangedType);
         }
     }
     
-    @Override
     public void workersBehavior(List<Unit> workers, Player p, PhysicalGameState pgs) {
         int nbases = 0;
         int nbarracks = 0;
@@ -161,8 +150,9 @@ public class POLightRushGabriel extends LightRush {
         	Unit u = freeWorkers.get(i);
         	if (unit == u && gameState.getPhysicalGameState() == pgs)
             {
-            	addAction(u, possibleActions);
+            	addAction(u, possibleAction);
             	freeWorkers.remove(i);
+            	break;
             }
         }
 
@@ -187,9 +177,9 @@ public class POLightRushGabriel extends LightRush {
             }
         }
 
-        if (nbarracks == 0) {
+        if (nbarracks == 0 && !freeWorkers.isEmpty()) {
             // build a barracks:
-            if (p.getResources() >= barracksType.cost + resourcesUsed && !freeWorkers.isEmpty()) {
+            if (p.getResources() >= barracksType.cost + resourcesUsed) {
                 Unit u = freeWorkers.remove(0);
                 buildIfNotAlreadyBuilding(u,barracksType,u.getX(),u.getY(),reservedPositions,p,pgs);
                 resourcesUsed += barracksType.cost;
@@ -227,9 +217,10 @@ public class POLightRushGabriel extends LightRush {
                     Harvest h_aa = (Harvest)aa;
                     if (h_aa.getTarget() != closestResource || h_aa.getBase()!=closestBase) harvest(u, closestResource, closestBase);
                 } else {
-                	harvest(u, closestResource, closestBase);
+                    harvest(u, closestResource, closestBase);
                 }
             }
         }
     }
+
 }

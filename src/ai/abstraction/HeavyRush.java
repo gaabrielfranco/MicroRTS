@@ -26,10 +26,10 @@ public class HeavyRush extends AbstractionLayerAI {
 
     Random r = new Random();
     protected UnitTypeTable utt;
-    UnitType workerType;
-    UnitType baseType;
-    UnitType barracksType;
-    UnitType heavyType;
+    protected UnitType workerType;
+    protected UnitType baseType;
+    protected UnitType barracksType;
+    protected UnitType heavyType;
 
     // Strategy implemented by this class:
     // If we have any "heavy": send it to attack to the nearest enemy unit

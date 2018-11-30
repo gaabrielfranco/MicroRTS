@@ -28,6 +28,7 @@ import ai.abstraction.pathfinding.AStarPathFinding;
 import ai.abstraction.pathfinding.BFSPathFinding;
 import ai.aiSelection.AlphaBetaSearch.AlphaBetaSearch;
 import ai.asymmetric.GAB.GAB_oldVersion;
+import ai.asymmetric.GAB.PGSLimit;
 import ai.asymmetric.GAB.SandBox.AlphaBetaSearchAbstract;
 import ai.asymmetric.GAB.SandBox.GAB;
 import ai.asymmetric.GAB.SandBox.GAB_SandBox_Parcial_State;
@@ -147,7 +148,8 @@ public class GameVisualSimulationTest {
         //AI ai1 = new POLightRush(utt);
         //AI ai1 = new WorkerRush(utt);
         //AI ai1 = new PGSmRTS_SandBox(utt);
-        AI ai1 = new GranularityPGSLimitRandom(utt); 
+        //AI ai1 = new GranularityPGSLimitRandom(utt);
+        AI ai1 = new GranularityPGSLimit(utt);
         //AI ai1 = new GAB(utt);
         //AI ai1 = new SAB(utt);
         //AI ai1 = new IDABCD(utt);
@@ -178,7 +180,8 @@ public class GameVisualSimulationTest {
                                              new SimpleSqrtEvaluationFunction3(), true, utt, 
                                             "ManagerClosestEnemy", 1,decodeScripts(utt, "48;0;"));
         */
-        AI ai2 = new PGSLimitRandom(utt);
+        //AI ai2 = new PGSLimitRandom(utt);
+        AI ai2 = new PGSLimit(utt);
         //AI ai2 = new GAB(utt);
         //AI ai1 = new Tiamat(utt);
         //AI ai2 = new Capivara(utt);
@@ -253,7 +256,7 @@ public class GameVisualSimulationTest {
                 startTime = System.currentTimeMillis();
                 PlayerAction pa2 = ai2.getAction(1, gs);
                 if( (System.currentTimeMillis() - startTime) >0){
-                   System.out.println("Tempo de execução P2="+(startTime = System.currentTimeMillis() - startTime));
+                   //System.out.println("Tempo de execução P2="+(startTime = System.currentTimeMillis() - startTime));
                 }
                 //System.out.println("Action A2 ="+ pa2.toString());
                 

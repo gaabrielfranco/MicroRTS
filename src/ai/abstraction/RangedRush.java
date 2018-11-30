@@ -26,10 +26,10 @@ public class RangedRush extends AbstractionLayerAI {
 
     Random r = new Random();
     protected UnitTypeTable utt;
-    UnitType workerType;
-    UnitType baseType;
-    UnitType barracksType;
-    UnitType rangedType;
+    protected UnitType workerType;
+    protected UnitType baseType;
+    protected UnitType barracksType;
+    protected UnitType rangedType;
 
     // If we have any "light": send it to attack to the nearest enemy unit
     // If we have a base: train worker until we have 1 workers

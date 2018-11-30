@@ -103,5 +103,5 @@ public class Harvest extends AbstractAction  {
                 base.getY() == unit.getY()) return new UnitAction(UnitAction.TYPE_RETURN,UnitAction.DIRECTION_LEFT);
         }
         return null;
-    }    
+    }
 }
