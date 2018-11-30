@@ -20,10 +20,14 @@ import ai.core.InterruptibleAI;
 import ai.core.ParameterSpecification;
 import ai.evaluation.EvaluationFunction;
 import ai.evaluation.SimpleSqrtEvaluationFunction3;
+import javafx.util.Pair;
+
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 //import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Collections;
 import rts.GameState;
@@ -47,7 +51,9 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
     List<AI> scripts = null;
     UnitTypeTable utt;
     PathFinding pf;
-    int _startTime;    
+    int _startTime;
+    
+    HashMap<Long,Set<UnitAction>> actionsAnalyzed = null;
     
     public AI defaultScript = null;
     private AI enemyScript = null;
@@ -84,6 +90,7 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
         scripts = new ArrayList<>();
         buildPortfolio(); 
         randAI = new RandomBiasedAI(utt);
+        actionsAnalyzed = new HashMap<Long,Set<UnitAction>>();
     }
     
     protected void buildPortfolio(){
@@ -239,7 +246,24 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
         AI ai2 = aiEnemy.clone();
         ai2.reset();
         GameState gs2 = gs.clone();
-        gs2.issue(uScriptPlayer.getAction(player, gs2));
+        
+        PlayerAction pAction = uScriptPlayer.getAction(player, gs2);
+        List<util.Pair<Unit, UnitAction>> unitActions = pAction.getActions();
+        for(util.Pair<Unit, UnitAction> p: unitActions)
+        {
+        	if(!actionsAnalyzed.containsKey(p.m_a.getID()))
+        	{
+        		Set<UnitAction> set = new HashSet<UnitAction>();
+        		set.add(p.m_b);
+        		actionsAnalyzed.put(p.m_a.getID(), set);
+        	}
+        	else
+        	{
+        		actionsAnalyzed.get(p.m_a.getID()).add(p.m_b);
+        	}
+        }
+        //gs2.issue(uScriptPlayer.getAction(player, gs2));
+        gs2.issue(pAction);
         gs2.issue(ai2.getAction(1 - player, gs2));
         int timeLimit = gs2.getTime() + LOOKAHEAD;
         boolean gameover = false;
@@ -438,36 +462,76 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
             	// Ordeno as unidades pelo critério que quero usar pra melhorar (ordem decrescente)
             	unitsPlayer.sort(new UnitComparator());
             	int iterations = 0;
-            	//HashMap<Unit, List<UnitAction>> unitActionsMap = new HashMap<Unit, List<UnitAction>>();
+            	HashMap<Long, List<UnitAction>> unitActionsMap = new HashMap<Long, List<UnitAction>>();
             	
             	while (System.currentTimeMillis() < (start_time + (TIME_BUDGET - 8))) {
             		// Pega a unidade que vai ser melhorada e as ações dela
             		Unit unitImprove = unitsPlayer.get(iterations);
-            		List<UnitAction> actions = unitImprove.getUnitActions(gs_to_start_from);
+            		
+            		List<UnitAction> actions = null;
+            		Boolean containKey = false;
+        			if(unitActionsMap.containsKey(unitImprove.getID())) 
+        			{
+        				actions = unitActionsMap.get(unitImprove.getID());
+        				containKey = true;
+        			}
+        			else
+        			{
+        				actions = unitImprove.getUnitActions(gs_to_start_from);
+        			}
+        			
+        			if (actionsAnalyzed.containsKey(unitImprove.getID()))
+        			{
+                		for (int i = 0; i < actions.size(); i++)
+                		{
+                			if(actionsAnalyzed.get(unitImprove.getID()).contains(actions.get(i)))
+                			{
+                				//System.out.println("Removeu");
+                				actions.remove(i);
+                			}
+                		}
+        			}
+        			
+        			if(!containKey)
+        			{
+        				unitActionsMap.put(unitImprove.getID(), actions);
+        			}
+
             		// Cria um script que retorna uma ação aleatória nessa game state
-	            	int randomPos = ThreadLocalRandom.current().nextInt(0, actions.size());
-	            	AI newScript = new POLightRushGabriel(utt, gs_to_start_from, unitImprove, actions.get(randomPos));
-	            	// Seto o novo script que vai ser testado
-	            	UnitScriptData newScriptData = currentScriptData.clone();
-	            	newScriptData.setUnitScript(unitImprove, newScript);
-	            	
-	            	double sum = 0.0;
-	                for (int j = 0; j < qtdSumPlayout; j++) {
-	                    sum += eval(player, gs_to_start_from, newScriptData, seedEnemy);
-	                }
-	                double scoreTemp = sum / qtdSumPlayout;
-	            	if (scoreTemp > _bestScore)
-	            	{
-	            		//System.out.println("Melhorou");
-	            		currentScriptData = newScriptData.clone();
-	            		scripts.add(newScript);
-	            		_bestScore = scoreTemp;
-	            	}
-	            	iterations = (iterations + 1) % unitsPlayer.size();
-	            	if (iterations == 0)
-	            	{
-	            		//System.out.println("Voltô\n");
-	            	}
+        			if (actions.size() != 0)
+        			{
+        				int randomPos = ThreadLocalRandom.current().nextInt(0, actions.size());
+    	            	AI newScript = new POLightRushGabriel(utt, gs_to_start_from, unitImprove, actions.get(randomPos));
+    	            	// Seto o novo script que vai ser testado
+    	            	UnitScriptData newScriptData = currentScriptData.clone();
+    	            	newScriptData.setUnitScript(unitImprove, newScript);
+    	            	
+    	            	double sum = 0.0;
+    	                for (int j = 0; j < qtdSumPlayout; j++) {
+    	                    sum += eval(player, gs_to_start_from, newScriptData, seedEnemy);
+    	                }
+    	                double scoreTemp = sum / qtdSumPlayout;
+    	            	if (scoreTemp > _bestScore)
+    	            	{
+    	            		//System.out.println("Melhorou");
+    	            		currentScriptData = newScriptData.clone();
+    	            		scripts.add(newScript);
+    	            		_bestScore = scoreTemp;
+    	            	}
+    	            	
+    	            	if(!actionsAnalyzed.containsKey(unitImprove.getID()))
+    	            	{
+    	            		Set<UnitAction> set = new HashSet<UnitAction>();
+    	            		set.add(actions.get(randomPos));
+    	            		actionsAnalyzed.put(unitImprove.getID(), set);
+    	            	}
+    	            	else
+    	            	{
+    	            		actionsAnalyzed.get(unitImprove.getID()).add(actions.get(randomPos));
+    	            	}
+        			}
+        			iterations = (iterations + 1) % unitsPlayer.size();
+
             	}
                 return currentScriptData;
             }
