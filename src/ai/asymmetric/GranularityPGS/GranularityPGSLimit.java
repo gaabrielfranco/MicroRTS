@@ -274,7 +274,7 @@ public class GranularityPGSLimit extends AIWithComputationBudget implements Inte
                 gameover = gs2.cycle();
             } else {
                 gs2.issue(uScriptPlayer.getAction(player, gs2));
-                gs2.issue(ai2.getAction(1-player, gs2));
+				gs2.issue(ai2.getAction(1-player, gs2));
             }
         }
         
@@ -393,7 +393,7 @@ public class GranularityPGSLimit extends AIWithComputationBudget implements Inte
     }
     
 
-	public class UnitComparator implements Comparator<Unit> {
+	public class UnitComparatorReverse implements Comparator<Unit> {
 		public int compare(Unit arg0, Unit arg1) {
 			
 			double DPSunit0 = ((double) arg0.getMaxDamage() / (double) arg0.getAttackTime()) / arg0.getHitPoints();
@@ -458,7 +458,7 @@ public class GranularityPGSLimit extends AIWithComputationBudget implements Inte
             }
    
         	// Ordeno as unidades pelo critério que quero usar pra melhorar (ordem decrescente)
-        	unitsPlayer.sort(new UnitComparator());
+        	unitsPlayer.sort(new UnitComparatorReverse());
         	
         	// Map das ações disponíveis para cada unidade
         	HashMap<Long, List<UnitAction>> unitActionsMap = new HashMap<Long, List<UnitAction>>();

@@ -1,5 +1,5 @@
 /*
-  * To change this license header, choose License Headers in Project Properties.
+ * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
@@ -8,11 +8,11 @@ package ai.asymmetric.GranularityPGS;
 import ai.RandomBiasedAI;
 import ai.abstraction.partialobservability.POHeavyRush;
 import ai.abstraction.partialobservability.POLightRush;
-import ai.abstraction.partialobservability.POLightRushV2;
 import ai.abstraction.partialobservability.PORangedRush;
 import ai.abstraction.partialobservability.POWorkerRush;
 import ai.abstraction.pathfinding.AStarPathFinding;
 import ai.abstraction.pathfinding.PathFinding;
+import ai.asymmetric.GranularityPGS.GranularityPGSLimit.UnitComparatorReverse;
 import ai.asymmetric.common.UnitScriptData;
 import ai.core.AI;
 import ai.core.AIWithComputationBudget;
@@ -20,17 +20,10 @@ import ai.core.InterruptibleAI;
 import ai.core.ParameterSpecification;
 import ai.evaluation.EvaluationFunction;
 import ai.evaluation.SimpleSqrtEvaluationFunction3;
-
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import util.Pair;
 import java.util.Comparator;
-
-//import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Collections;
+import java.util.HashMap;
+import java.util.List;
 import rts.GameState;
 import rts.PlayerAction;
 import rts.UnitAction;
@@ -39,9 +32,9 @@ import rts.units.UnitTypeTable;
 
 /**
  *
- * @author Gabriel Franco and rubens
+ * @author rubens
  */
-public class GranularityPGSLimitRandom extends AIWithComputationBudget implements InterruptibleAI {
+public class GranularityPGSLimitRandomRB extends AIWithComputationBudget implements InterruptibleAI {
 
 	int LOOKAHEAD = 200;
 	int I = 1; // number of iterations for improving a given player
@@ -51,8 +44,6 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
 	UnitTypeTable utt;
 	PathFinding pf;
 	int _startTime;
-
-	HashMap<Long, Set<UnitAction>> actionsAnalyzed = null;
 
 	public AI defaultScript = null;
 	private AI enemyScript = null;
@@ -67,14 +58,14 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
 	AI randAI = null;
 	int qtdSumPlayout = 2;
 
-	public GranularityPGSLimitRandom(UnitTypeTable utt) {
+	public GranularityPGSLimitRandomRB(UnitTypeTable utt) {
 		this(100, -1, 200, 1, 1, new SimpleSqrtEvaluationFunction3(),
 				// new SimpleSqrtEvaluationFunction2(),
 				// new LanchesterEvaluationFunction(),
 				utt, new AStarPathFinding());
 	}
 
-	public GranularityPGSLimitRandom(int time, int max_playouts, int la, int a_I, int a_R, EvaluationFunction e,
+	public GranularityPGSLimitRandomRB(int time, int max_playouts, int la, int a_I, int a_R, EvaluationFunction e,
 			UnitTypeTable a_utt, PathFinding a_pf) {
 		super(time, max_playouts);
 
@@ -88,7 +79,6 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
 		scripts = new ArrayList<>();
 		buildPortfolio();
 		randAI = new RandomBiasedAI(utt);
-		actionsAnalyzed = new HashMap<Long, Set<UnitAction>>();
 	}
 
 	protected void buildPortfolio() {
@@ -96,8 +86,6 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
 		this.scripts.add(new POHeavyRush(utt));
 		this.scripts.add(new PORangedRush(utt));
 		this.scripts.add(new POWorkerRush(utt));
-
-		// this.scripts.add(new POLightRushGabriel(utt));
 
 		// this.scripts.add(new POHeavyRush(utt, new FloodFillPathFinding()));
 		// this.scripts.add(new POLightRush(utt, new FloodFillPathFinding()));
@@ -245,20 +233,7 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
 		AI ai2 = aiEnemy.clone();
 		ai2.reset();
 		GameState gs2 = gs.clone();
-
-		PlayerAction pAction = uScriptPlayer.getAction(player, gs2);
-		List<Pair<Unit, UnitAction>> unitActions = pAction.getActions();
-		for (Pair<Unit, UnitAction> p : unitActions) {
-			if (!actionsAnalyzed.containsKey(p.m_a.getID())) {
-				Set<UnitAction> set = new HashSet<UnitAction>();
-				set.add(p.m_b);
-				actionsAnalyzed.put(p.m_a.getID(), set);
-			} else {
-				actionsAnalyzed.get(p.m_a.getID()).add(p.m_b);
-			}
-		}
-		// gs2.issue(uScriptPlayer.getAction(player, gs2));
-		gs2.issue(pAction);
+		gs2.issue(uScriptPlayer.getAction(player, gs2));
 		gs2.issue(ai2.getAction(1 - player, gs2));
 		int timeLimit = gs2.getTime() + LOOKAHEAD;
 		boolean gameover = false;
@@ -276,7 +251,7 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
 
 	@Override
 	public AI clone() {
-		return new GranularityPGSLimitRandom(TIME_BUDGET, ITERATIONS_BUDGET, LOOKAHEAD, I, R, evaluation, utt, pf);
+		return new GranularityPGSLimitRandomRB(TIME_BUDGET, ITERATIONS_BUDGET, LOOKAHEAD, I, R, evaluation, utt, pf);
 	}
 
 	@Override
@@ -378,7 +353,7 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
 		}
 	}
 
-	public class UnitComparator implements Comparator<Unit> {
+	public class UnitComparatorReverse implements Comparator<Unit> {
 		public int compare(Unit arg0, Unit arg1) {
 
 			double DPSunit0 = ((double) arg0.getMaxDamage() / (double) arg0.getAttackTime()) / arg0.getHitPoints();
@@ -408,9 +383,6 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
 			boolean hasImproved = false;
 			// fazer o improve de cada unidade
 			for (Unit unit : unitsPlayer) {
-				// List<UnitAction> allActions = unit.getUnitActions(gs_to_start_from);
-				// System.out.println(unit + " " + allActions);
-
 				// inserir controle de tempo
 				if (System.currentTimeMillis() >= (start_time + (TIME_BUDGET - 10))) {
 					return currentScriptData;
@@ -437,100 +409,6 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
 				currentScriptData = bestScriptData.clone();
 			}
 			if (!hasImproved) {
-				// Controle de tempo
-				if (System.currentTimeMillis() >= (start_time + (TIME_BUDGET - 10))) {
-					return currentScriptData;
-				}
-
-				// Ordeno as unidades pelo critério que quero usar pra melhorar (ordem
-				// decrescente)
-				unitsPlayer.sort(new UnitComparator());
-
-				// Map das ações disponíveis para cada unidade
-				HashMap<Long, List<UnitAction>> unitActionsMap = new HashMap<Long, List<UnitAction>>();
-				int iterations = 0;
-				Boolean allEmpty = false;
-				// System.out.println("Disponiveis " + unitsPlayer.size() + " unidades");
-				while (System.currentTimeMillis() < (start_time + (TIME_BUDGET - 8))) {
-					// Pega a unidade que vai ser melhorada e as ações dela
-					Unit unitImprove = unitsPlayer.get(iterations);
-
-					// Se as ações possíveis estão no map de ações possíveis, pego elas, senão,
-					// chama getUnitActions
-					List<UnitAction> actions = null;
-					Boolean containKey = false;
-					if (unitActionsMap.containsKey(unitImprove.getID())) {
-						actions = unitActionsMap.get(unitImprove.getID());
-						containKey = true;
-					} else {
-						actions = unitImprove.getUnitActions(gs_to_start_from);
-						// System.out.println("Disponiveis " + actions.size() + " ações para essa
-						// unidade");
-					}
-
-					// Remove as ações possíveis que já foram buscadas pelo PGS
-					if (actionsAnalyzed.containsKey(unitImprove.getID())) {
-						for (int i = 0; i < actions.size(); i++) {
-							if (actionsAnalyzed.get(unitImprove.getID()).contains(actions.get(i))) {
-								// System.out.println("Removeu");
-								actions.remove(i);
-							}
-						}
-					}
-
-					// Se as ações possíveis não estão no map, elas são colocadas
-					if (!containKey) {
-						unitActionsMap.put(unitImprove.getID(), actions);
-					}
-
-					// Se existem ações que não foram buscadas pelo PGS
-					if (actions.size() != 0) {
-						// Cria um script que retorna uma ação aleatória nessa game state
-						int randomPos = ThreadLocalRandom.current().nextInt(0, actions.size());
-						AI newScript = new POLightRushV2(utt, gs_to_start_from, unitImprove, actions.get(randomPos));
-
-						// Seto o novo script que vai ser testado
-						UnitScriptData newScriptData = currentScriptData.clone();
-						newScriptData.setUnitScript(unitImprove, newScript);
-
-						// Avalio esse novo script
-						double sum = 0.0;
-						for (int j = 0; j < qtdSumPlayout; j++) {
-							sum += eval(player, gs_to_start_from, newScriptData, seedEnemy);
-						}
-						double scoreTemp = sum / qtdSumPlayout;
-
-						if (scoreTemp > _bestScore) {
-							currentScriptData = newScriptData.clone();
-							scripts.add(newScript);
-							_bestScore = scoreTemp;
-						}
-
-						// Coloco a ação que acabou de ser analisada no map de ações já buscadas
-						if (!actionsAnalyzed.containsKey(unitImprove.getID())) {
-							Set<UnitAction> set = new HashSet<UnitAction>();
-							set.add(actions.get(randomPos));
-							actionsAnalyzed.put(unitImprove.getID(), set);
-						} else {
-							actionsAnalyzed.get(unitImprove.getID()).add(actions.get(randomPos));
-						}
-					} else {
-						// Verifico se existem mais ações. Se não existe, a busca acaba
-						Set<Long> keys = unitActionsMap.keySet();
-						allEmpty = true;
-						for (Long k : keys) {
-							if (!unitActionsMap.get(k).isEmpty()) {
-								allEmpty = false;
-								break;
-							}
-						}
-					}
-
-					if (allEmpty) {
-						return currentScriptData;
-					}
-					iterations = (iterations + 1) % unitsPlayer.size();
-				}
 				return currentScriptData;
 			}
 			counterIterations++;
@@ -550,6 +428,35 @@ public class GranularityPGSLimitRandom extends AIWithComputationBudget implement
 	}
 
 	public PlayerAction getFinalAction(UnitScriptData currentScriptData) throws Exception {
+		if (System.currentTimeMillis() < (start_time + (TIME_BUDGET - 8))) {
+			AI seedEnemy = getSeedPlayer(1 - playerForThisComputation);
+			ArrayList<Unit> unitsPlayer = getUnitsPlayer(playerForThisComputation);
+			unitsPlayer.sort(new UnitComparatorReverse());
+			int iterations = 0;
+			scripts.add(randAI);
+
+			while (System.currentTimeMillis() < (start_time + (TIME_BUDGET - 8)) && iterations < unitsPlayer.size()) {
+				// Pega a unidade que vai ser melhorada e as ações dela
+				Unit unitImprove = unitsPlayer.get(iterations);
+				// Seto o novo script que vai ser testado
+				UnitScriptData newScriptData = currentScriptData.clone();
+				newScriptData.setUnitScript(unitImprove, randAI);
+
+				// Avalio esse novo script
+				double sum = 0.0;
+				for (int j = 0; j < qtdSumPlayout; j++) {
+					sum += eval(playerForThisComputation, gs_to_start_from, newScriptData, seedEnemy);
+				}
+				double scoreTemp = sum / qtdSumPlayout;
+
+				if (scoreTemp > _bestScore) {
+					currentScriptData = newScriptData.clone();
+					_bestScore = scoreTemp;
+				}
+				iterations++;
+			}
+		}
+
 		PlayerAction pAction = new PlayerAction();
 		HashMap<String, PlayerAction> actions = new HashMap<>();
 		for (AI script : scripts) {
