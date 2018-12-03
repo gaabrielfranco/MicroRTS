@@ -56,13 +56,15 @@ public class RandomScript extends LightRush {
         return new RandomScript(utt, pf);
     }
     
-    HashMap<Long, List<UnitAction>> getPossibleActions()
+    public HashMap<Long, List<UnitAction>> getPossibleActions()
     {
+    	System.out.println(possibleActions.size());
     	return possibleActions;
     }
     
     @Override
     public void meleeUnitBehavior(Unit u, Player p, GameState gs) {
+    	System.out.println(possibleActions.size());
     	int randomPos = ThreadLocalRandom.current().nextInt(0, possibleActions.get(u.getID()).size());
     	addAction(u, possibleActions.get(u.getID()).get(randomPos));
     	possibleActions.get(u.getID()).remove(randomPos);
@@ -70,6 +72,7 @@ public class RandomScript extends LightRush {
     
     @Override
     public void baseBehavior(Unit u, Player p, PhysicalGameState pgs) {
+    	System.out.println(possibleActions.size());
     	int randomPos = ThreadLocalRandom.current().nextInt(0, possibleActions.get(u.getID()).size());
     	addAction(u, possibleActions.get(u.getID()).get(randomPos));
     	possibleActions.get(u.getID()).remove(randomPos);
@@ -77,6 +80,7 @@ public class RandomScript extends LightRush {
     
     @Override
     public void barracksBehavior(Unit u, Player p, PhysicalGameState pgs) {
+    	System.out.println(possibleActions.size());
     	int randomPos = ThreadLocalRandom.current().nextInt(0, possibleActions.get(u.getID()).size());
     	addAction(u, possibleActions.get(u.getID()).get(randomPos));
     	possibleActions.get(u.getID()).remove(randomPos);
@@ -84,6 +88,7 @@ public class RandomScript extends LightRush {
     
     @Override
     public void workersBehavior(List<Unit> workers, Player p, PhysicalGameState pgs) {
+    	System.out.println(possibleActions.size());
     	for (Unit u: workers)
     	{
         	int randomPos = ThreadLocalRandom.current().nextInt(0, possibleActions.get(u.getID()).size());

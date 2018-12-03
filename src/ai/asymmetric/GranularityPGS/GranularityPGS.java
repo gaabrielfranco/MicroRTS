@@ -446,7 +446,10 @@ public class GranularityPGS extends AIWithComputationBudget implements Interrupt
 				currentScriptData = bestScriptData.clone();
 			}
 			//Adicionar os scripts aleatórios aqui
-			if(counterIterations == 0) scripts.add(new RandomScript(utt, unitActionsMap));
+			if(counterIterations == 0)
+			{
+				scripts.add(new RandomScript(utt, unitActionsMap));
+			}
 			counterIterations++;
 		}
 		return currentScriptData;
