@@ -46,7 +46,6 @@ public class POLightRushV2 extends LightRush {
     	possibleAction = a;
     }
     
-    
     public POLightRushV2(UnitTypeTable a_utt, PathFinding a_pf) {
         super(a_utt, a_pf);
     }
@@ -58,6 +57,11 @@ public class POLightRushV2 extends LightRush {
 
     public AI clone() {
         return new POLightRushV2(utt, pf);
+    }
+    
+    public Unit getUnit()
+    {
+    	return unit;
     }
     
     @Override

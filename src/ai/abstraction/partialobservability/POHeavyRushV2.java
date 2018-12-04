@@ -55,6 +55,11 @@ public class POHeavyRushV2 extends HeavyRush {
     public AI clone() {
         return new POHeavyRushV2(utt, pf);
     }
+    
+    public Unit getUnit()
+    {
+    	return unit;
+    }
 
     public void meleeUnitBehavior(Unit u, Player p, GameState gs) {
     	

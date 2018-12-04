@@ -55,6 +55,11 @@ public class PORangedRushV2 extends RangedRush {
     public AI clone() {
         return new PORangedRushV2(utt, pf);
     }
+    
+    public Unit getUnit()
+    {
+    	return unit;
+    }
 
     public void meleeUnitBehavior(Unit u, Player p, GameState gs) {
         PhysicalGameState pgs = gs.getPhysicalGameState();

@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.swing.JFrame;
 
+import ai.asymmetric.GAB.PGSLimit;
 import ai.asymmetric.GAB.SandBox.PGSLimitRandom;
 import ai.configurablescript.BasicExpandedConfigurableScript;
 import ai.configurablescript.ScriptsCreator;
@@ -29,23 +30,22 @@ public class GameVisualSimulationTest {
 	static AI[] strategies = null;
 
 	public static void main(String args[]) throws Exception {
+		int numWins = 0;
+		for(int i = 0; i < 10; i++) {
 		UnitTypeTable utt = new UnitTypeTable();
 		// UnitTypeTable utt = new UnitTYpeTableBattle();
 		// PhysicalGameState pgs =
 		// PhysicalGameState.load("maps/16x16/basesWorkers16x16.xml", utt);
-		// PhysicalGameState pgs =
-		// PhysicalGameState.load("maps/8x8/basesWorkers8x8A.xml", utt);
-		// PhysicalGameState pgs =
-		// PhysicalGameState.load("maps/16x16/basesWorkers16x16A.xml", utt);
+		PhysicalGameState pgs = PhysicalGameState.load("maps/8x8/basesWorkers8x8A.xml", utt);
+		//PhysicalGameState pgs = PhysicalGameState.load("maps/16x16/basesWorkers16x16A.xml", utt);
 		// PhysicalGameState pgs =
 		// PhysicalGameState.load("maps/BWDistantResources32x32.xml", utt);
-		PhysicalGameState pgs = PhysicalGameState.load("maps/32x32/basesWorkers32x32A.xml", utt);
+		//PhysicalGameState pgs = PhysicalGameState.load("maps/32x32/basesWorkers32x32A.xml", utt);
 		// PhysicalGameState pgs =
 		// PhysicalGameState.load("maps/24x24/basesWorkers24x24A.xml", utt);
 		// PhysicalGameState pgs =
 		// PhysicalGameState.load("maps/BroodWar/(4)BloodBath.scmB.xml", utt);
-		// PhysicalGameState pgs =
-		// PhysicalGameState.load("maps/8x8/FourBasesWorkers8x8.xml", utt);
+		//PhysicalGameState pgs = PhysicalGameState.load("maps/8x8/FourBasesWorkers8x8.xml", utt);
 		// PhysicalGameState pgs =
 		// PhysicalGameState.load("maps/16x16/TwoBasesBarracks16x16.xml", utt);
 		// PhysicalGameState pgs = PhysicalGameState.load("maps/NoWhereToRun9x8.xml",
@@ -86,7 +86,8 @@ public class GameVisualSimulationTest {
 		// AI ai1 = new GranularityPGSLimit(utt);
 		// AI ai1 = new GranularityPGSLimitRandomRB(utt);
 		// AI ai1 = new GranularityPGSLimitRB(utt);
-		AI ai1 = new GranularityPGS(utt);
+		//AI ai1 = new GranularityPGSRandom(utt);
+		AI ai1 = new GranularityPGSWR(utt);
 		// AI ai1 = new GAB(utt);
 		// AI ai1 = new SAB(utt);
 		// AI ai1 = new IDABCD(utt);
@@ -124,7 +125,8 @@ public class GameVisualSimulationTest {
 		 * "ManagerClosestEnemy", 1,decodeScripts(utt, "48;0;"));
 		 */
 		AI ai2 = new PGSLimitRandom(utt);
-		// AI ai2 = new PGSLimit(utt);
+		//AI ai2 = new GranularityPGSLimit(utt);
+		//AI ai2 = new PGSLimit(utt);
 		// AI ai2 = new GAB(utt);
 		// AI ai1 = new Tiamat(utt);
 		// AI ai2 = new Capivara(utt);
@@ -195,7 +197,7 @@ public class GameVisualSimulationTest {
 				startTime = System.currentTimeMillis();
 				PlayerAction pa1 = ai1.getAction(0, gs);
 				if ((System.currentTimeMillis() - startTime) > 0) {
-					System.out.println("Tempo de execução P1=" + (startTime = System.currentTimeMillis() - startTime));
+					//System.out.println("Tempo de execução P1=" + (startTime = System.currentTimeMillis() - startTime));
 				}
 				// System.out.println("Action A1 ="+ pa1.toString());
 
@@ -231,7 +233,12 @@ public class GameVisualSimulationTest {
 			 */
 		} while (!gameover && gs.getTime() < MAXCYCLES);
 		System.out.println("Winner " + Integer.toString(gs.winner()));
-		System.out.println("Game Over");
+		System.out.println("Game Over\n");
+		if (gs.winner() == 0) {
+			numWins++;
+		}
+		}
+		System.out.println("Total de vitórias = " + numWins);
 	}
 
 	public static List<AI> decodeScripts(UnitTypeTable utt, String sScripts) {

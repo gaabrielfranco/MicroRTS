@@ -23,18 +23,18 @@ import rts.units.UnitTypeTable;
  * @author gabriel
  */
 public class RandomScript extends LightRush {
-	Unit unit;
+	Long unitID;
 	UnitAction possibleAction;
 
 	public RandomScript(UnitTypeTable a_utt) {
 		this(a_utt, new AStarPathFinding());
 	}
 
-	public RandomScript(UnitTypeTable a_utt, Unit u, UnitAction a) {
+	public RandomScript(UnitTypeTable a_utt, Long uID, UnitAction a) {
 		this(a_utt, new AStarPathFinding());
 
-		unit = u;
-		possibleAction = a;
+		this.unitID = uID;
+		this.possibleAction = a;
 	}
 
 	public RandomScript(UnitTypeTable a_utt, PathFinding a_pf) {
@@ -46,44 +46,44 @@ public class RandomScript extends LightRush {
 	}
 
 	public AI clone() {
-		return new RandomScript(utt, pf);
+		return new RandomScript(utt, unitID, possibleAction);
 	}
 
-	public Unit getUnit() {
-		return unit;
+	public Long getUnitID() {
+		return this.unitID;
 	}
 
 	public UnitAction getAct() {
-		return possibleAction;
+		return this.possibleAction;
 	}
 
 	@Override
 	public void meleeUnitBehavior(Unit u, Player p, GameState gs) {
-		if (u == unit)
-			addAction(unit, possibleAction);
-		// else System.out.println("M RUIM");
+		if (u.getID() == this.unitID)
+			addAction(u, this.possibleAction);
+		//else System.out.println("MEL RUIM");
 	}
 
 	@Override
 	public void baseBehavior(Unit u, Player p, PhysicalGameState pgs) {
-		if (u == unit)
-			addAction(unit, possibleAction);
-		// else System.out.println("BAS RUIM");
+		if (u.getID() == this.unitID)
+			addAction(u, this.possibleAction);
+		//else System.out.println("BAS RUIM");
 	}
 
 	@Override
 	public void barracksBehavior(Unit u, Player p, PhysicalGameState pgs) {
-		if (u == unit)
-			addAction(unit, possibleAction);
-		// else System.out.println("BAR RUIM");
+		if (u.getID() == this.unitID)
+			addAction(u, this.possibleAction);
+		//else System.out.println("BAR RUIM");
 	}
 
 	@Override
 	public void workersBehavior(List<Unit> workers, Player p, PhysicalGameState pgs) {
 		for (Unit u : workers) {
-			if (u.equals(unit)) {
-				addAction(u, possibleAction);
-			} // else System.out.println("W RUIM");
+			if (u.getID() == this.unitID) {
+				addAction(u, this.possibleAction);
+			} //else System.out.println("WORK RUIM");
 		}
 	}
 }

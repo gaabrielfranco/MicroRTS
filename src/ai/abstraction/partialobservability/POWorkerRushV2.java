@@ -55,6 +55,11 @@ public class POWorkerRushV2 extends WorkerRush {
     public AI clone() {
         return new POWorkerRushV2(utt, pf);
     }
+    
+    public Unit getUnit()
+    {
+    	return unit;
+    }
 
     public void meleeUnitBehavior(Unit u, Player p, GameState gs) {
         if (unit == u && gameState == gs)

@@ -13,9 +13,13 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import ai.RandomBiasedAI;
 import ai.abstraction.partialobservability.POHeavyRush;
+import ai.abstraction.partialobservability.POHeavyRushV2;
 import ai.abstraction.partialobservability.POLightRush;
+import ai.abstraction.partialobservability.POLightRushV2;
 import ai.abstraction.partialobservability.PORangedRush;
+import ai.abstraction.partialobservability.PORangedRushV2;
 import ai.abstraction.partialobservability.POWorkerRush;
+import ai.abstraction.partialobservability.POWorkerRushV2;
 import ai.abstraction.partialobservability.RandomScript;
 import ai.abstraction.pathfinding.AStarPathFinding;
 import ai.abstraction.pathfinding.PathFinding;
@@ -38,7 +42,7 @@ import util.Pair;
  *
  * @author Gabriel Franco and rubens
  */
-public class GranularityPGS extends AIWithComputationBudget implements InterruptibleAI {
+public class GranularityPGSWR extends AIWithComputationBudget implements InterruptibleAI {
 
 	int LOOKAHEAD = 200;
 	int I = 1; // number of iterations for improving a given player
@@ -62,16 +66,17 @@ public class GranularityPGS extends AIWithComputationBudget implements Interrupt
 	double _bestScore;
 
 	AI randAI = null;
+	AI workerRushAI = null;
 	int qtdSumPlayout = 2;
 
-	public GranularityPGS(UnitTypeTable utt) {
+	public GranularityPGSWR(UnitTypeTable utt) {
 		this(100, -1, 200, 1, 1, new SimpleSqrtEvaluationFunction3(),
 				// new SimpleSqrtEvaluationFunction2(),
 				// new LanchesterEvaluationFunction(),
 				utt, new AStarPathFinding());
 	}
 
-	public GranularityPGS(int time, int max_playouts, int la, int a_I, int a_R, EvaluationFunction e,
+	public GranularityPGSWR(int time, int max_playouts, int la, int a_I, int a_R, EvaluationFunction e,
 			UnitTypeTable a_utt, PathFinding a_pf) {
 		super(time, max_playouts);
 
@@ -86,6 +91,7 @@ public class GranularityPGS extends AIWithComputationBudget implements Interrupt
 		buildPortfolio();
 		randAI = new RandomBiasedAI(utt);
 		unitActionsMap = new HashMap<Long, List<UnitAction>>();
+		workerRushAI = new POWorkerRush(utt);
 	}
 
 	protected void buildPortfolio() {
@@ -266,8 +272,10 @@ public class GranularityPGS extends AIWithComputationBudget implements Interrupt
 			if (gs2.isComplete()) {
 				gameover = gs2.cycle();
 			} else {
-				gs2.issue(randAI.getAction(player, gs2));
-				gs2.issue(randAI.getAction(1 - player, gs2));
+				gs2.issue(uScriptPlayer.getAction(player, gs2));
+				gs2.issue(ai2.getAction(1 - player, gs2));
+				//gs2.issue(workerRushAI.getAction(player, gs2));
+				//gs2.issue(workerRushAI.getAction(1 - player, gs2));
 			}
 		}
 
@@ -276,7 +284,7 @@ public class GranularityPGS extends AIWithComputationBudget implements Interrupt
 
 	@Override
 	public AI clone() {
-		return new GranularityPGS(TIME_BUDGET, ITERATIONS_BUDGET, LOOKAHEAD, I, R, evaluation, utt, pf);
+		return new GranularityPGSWR(TIME_BUDGET, ITERATIONS_BUDGET, LOOKAHEAD, I, R, evaluation, utt, pf);
 	}
 
 	@Override
@@ -378,22 +386,6 @@ public class GranularityPGS extends AIWithComputationBudget implements Interrupt
 		}
 	}
 
-	public class UnitComparator implements Comparator<Unit> {
-		public int compare(Unit arg0, Unit arg1) {
-
-			double DPSunit0 = ((double) arg0.getMaxDamage() / (double) arg0.getAttackTime()) / arg0.getHitPoints();
-			double DPSunit1 = ((double) arg1.getMaxDamage() / (double) arg1.getAttackTime()) / arg1.getHitPoints();
-
-			if (DPSunit0 < DPSunit1) {
-				return 1;
-			} else if (DPSunit0 > DPSunit1) {
-				return -1;
-			} else {
-				return 0;
-			}
-		}
-	}
-
 	private UnitScriptData doPortfolioSearch(int player, UnitScriptData currentScriptData, AI seedEnemy)
 			throws Exception {
 		int enemy = 1 - player;
@@ -421,17 +413,21 @@ public class GranularityPGS extends AIWithComputationBudget implements Interrupt
 				List<UnitAction> possibleAct = unitActionsMap.get(unit.getID());
 				if (!possibleAct.isEmpty()) {
 					int randomPos = ThreadLocalRandom.current().nextInt(0, possibleAct.size());
-					scripts.add(new RandomScript(utt, unit, possibleAct.get(randomPos)));
+					//scripts.add(new RandomScript(utt, unit.getID(), possibleAct.get(randomPos)));
+					scripts.add(new POWorkerRushV2(utt, gs_to_start_from, unit, possibleAct.get(randomPos)));
 					unitActionsMap.get(unit.getID()).remove(randomPos);
 				}
+				//System.out.println("------------------------------------------\n");
+				//System.out.println("Tam do portfolio = " + scripts.size());
 
-				// System.out.println("Tam do portfolio = " + scripts.size());
-
-				// iterar sobre cada script do portfolio
+				//iterar sobre cada script do portfolio
 				for (AI ai : scripts) {
-					if (ai.toString().equals("RandomScript(AStarPathFinding)")) {
-						// System.out.println(((RandomScript) ai).getUnit() + " " + unit);
-						if (((RandomScript) ai).getUnit().equals(unit)) {
+					//if (System.currentTimeMillis() >= (start_time + (TIME_BUDGET - 10))) {
+					//	return currentScriptData;
+					//}
+					//mudar o uso do currentScriptData
+					if (ai.toString().equals("POWorkerRushV2(AStarPathFinding)")) {
+						if (((POWorkerRushV2) ai).getUnit().getID() == unit.getID()) {
 							currentScriptData.setUnitScript(unit, ai);
 							double sum = 0.0;
 							for (int j = 0; j < qtdSumPlayout; j++) {
@@ -447,7 +443,8 @@ public class GranularityPGS extends AIWithComputationBudget implements Interrupt
 								_bestScore = bestScore;
 							}
 						}
-					} else {
+					} 
+					else {
 						currentScriptData.setUnitScript(unit, ai);
 						double sum = 0.0;
 						for (int j = 0; j < qtdSumPlayout; j++) {
@@ -470,7 +467,7 @@ public class GranularityPGS extends AIWithComputationBudget implements Interrupt
 			counterIterations++;
 		}
 		// System.out.println(currentScriptData);
-		// System.out.println("----------------------------------------------------");
+		//System.out.println("----------------------------------------------------");
 		return currentScriptData;
 	}
 
