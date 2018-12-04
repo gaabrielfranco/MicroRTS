@@ -5,20 +5,13 @@
  */
 package ai.abstraction.partialobservability;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
-import ai.abstraction.AbstractAction;
-import ai.abstraction.Harvest;
 import ai.abstraction.LightRush;
 import ai.abstraction.pathfinding.AStarPathFinding;
 import ai.abstraction.pathfinding.PathFinding;
 import ai.core.AI;
 import rts.GameState;
-import rts.PartiallyObservableGameState;
 import rts.PhysicalGameState;
 import rts.Player;
 import rts.UnitAction;
@@ -30,70 +23,67 @@ import rts.units.UnitTypeTable;
  * @author gabriel
  */
 public class RandomScript extends LightRush {
-	HashMap<Long, List<UnitAction>> possibleActions;
+	Unit unit;
+	UnitAction possibleAction;
 
-    public RandomScript(UnitTypeTable a_utt) {
-        this(a_utt, new AStarPathFinding());
-    }
-    
-    public RandomScript(UnitTypeTable a_utt, HashMap<Long, List<UnitAction>> act) {
-    	this(a_utt, new AStarPathFinding());
+	public RandomScript(UnitTypeTable a_utt) {
+		this(a_utt, new AStarPathFinding());
+	}
 
-    	possibleActions = new HashMap<Long, List<UnitAction>>(act);
-    }
-    
-    
-    public RandomScript(UnitTypeTable a_utt, PathFinding a_pf) {
-        super(a_utt, a_pf);
-    }
-    
+	public RandomScript(UnitTypeTable a_utt, Unit u, UnitAction a) {
+		this(a_utt, new AStarPathFinding());
 
-    public void reset() {
-    	super.reset();
-    }
+		unit = u;
+		possibleAction = a;
+	}
 
-    public AI clone() {
-        return new RandomScript(utt, pf);
-    }
-    
-    public HashMap<Long, List<UnitAction>> getPossibleActions()
-    {
-    	System.out.println(possibleActions.size());
-    	return possibleActions;
-    }
-    
-    @Override
-    public void meleeUnitBehavior(Unit u, Player p, GameState gs) {
-    	System.out.println(possibleActions.size());
-    	int randomPos = ThreadLocalRandom.current().nextInt(0, possibleActions.get(u.getID()).size());
-    	addAction(u, possibleActions.get(u.getID()).get(randomPos));
-    	possibleActions.get(u.getID()).remove(randomPos);
-    }
-    
-    @Override
-    public void baseBehavior(Unit u, Player p, PhysicalGameState pgs) {
-    	System.out.println(possibleActions.size());
-    	int randomPos = ThreadLocalRandom.current().nextInt(0, possibleActions.get(u.getID()).size());
-    	addAction(u, possibleActions.get(u.getID()).get(randomPos));
-    	possibleActions.get(u.getID()).remove(randomPos);
-    }
-    
-    @Override
-    public void barracksBehavior(Unit u, Player p, PhysicalGameState pgs) {
-    	System.out.println(possibleActions.size());
-    	int randomPos = ThreadLocalRandom.current().nextInt(0, possibleActions.get(u.getID()).size());
-    	addAction(u, possibleActions.get(u.getID()).get(randomPos));
-    	possibleActions.get(u.getID()).remove(randomPos);
-    }
-    
-    @Override
-    public void workersBehavior(List<Unit> workers, Player p, PhysicalGameState pgs) {
-    	System.out.println(possibleActions.size());
-    	for (Unit u: workers)
-    	{
-        	int randomPos = ThreadLocalRandom.current().nextInt(0, possibleActions.get(u.getID()).size());
-        	addAction(u, possibleActions.get(u.getID()).get(randomPos));
-        	possibleActions.get(u.getID()).remove(randomPos);
-    	}
-    }
+	public RandomScript(UnitTypeTable a_utt, PathFinding a_pf) {
+		super(a_utt, a_pf);
+	}
+
+	public void reset() {
+		super.reset();
+	}
+
+	public AI clone() {
+		return new RandomScript(utt, pf);
+	}
+
+	public Unit getUnit() {
+		return unit;
+	}
+
+	public UnitAction getAct() {
+		return possibleAction;
+	}
+
+	@Override
+	public void meleeUnitBehavior(Unit u, Player p, GameState gs) {
+		if (u == unit)
+			addAction(unit, possibleAction);
+		// else System.out.println("M RUIM");
+	}
+
+	@Override
+	public void baseBehavior(Unit u, Player p, PhysicalGameState pgs) {
+		if (u == unit)
+			addAction(unit, possibleAction);
+		// else System.out.println("BAS RUIM");
+	}
+
+	@Override
+	public void barracksBehavior(Unit u, Player p, PhysicalGameState pgs) {
+		if (u == unit)
+			addAction(unit, possibleAction);
+		// else System.out.println("BAR RUIM");
+	}
+
+	@Override
+	public void workersBehavior(List<Unit> workers, Player p, PhysicalGameState pgs) {
+		for (Unit u : workers) {
+			if (u.equals(unit)) {
+				addAction(u, possibleAction);
+			} // else System.out.println("W RUIM");
+		}
+	}
 }

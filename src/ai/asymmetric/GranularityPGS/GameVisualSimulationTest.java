@@ -4,95 +4,20 @@
  */
 package ai.asymmetric.GranularityPGS;
 
-import tests.*;
-import PVAI.EconomyRush;
-import PVAI.EconomyRushBurster;
-import PVAI.WorkerDefense;
-import PVAI.RangedDefense;
-import Standard.CombinedEvaluation;
-import Standard.StrategyTactics;
-import ai.core.AI;
-import ai.*;
-import ai.CMAB.CMABBuilder;
-import ai.CMAB.CmabNaiveMCTS;
-import ai.abstraction.HeavyRush;
-import ai.abstraction.LightRush;
-import ai.abstraction.RangedRush;
-import ai.abstraction.WorkerRush;
-import ai.abstraction.combat.Cluster;
-import ai.abstraction.combat.KitterDPS;
-import ai.abstraction.combat.NOKDPS;
-import ai.abstraction.partialobservability.POLightRush;
-import ai.abstraction.partialobservability.PORangedRush;
-import ai.abstraction.pathfinding.AStarPathFinding;
-import ai.abstraction.pathfinding.BFSPathFinding;
-import ai.aiSelection.AlphaBetaSearch.AlphaBetaSearch;
-import ai.asymmetric.GAB.GAB_oldVersion;
-import ai.asymmetric.GAB.PGSLimit;
-import ai.asymmetric.GAB.SandBox.AlphaBetaSearchAbstract;
-import ai.asymmetric.GAB.SandBox.GAB;
-import ai.asymmetric.GAB.SandBox.GAB_SandBox_Parcial_State;
-import ai.asymmetric.GAB.SandBox.PGSLimitRandom;
-import ai.asymmetric.PGS.SandBox.PGSmRTS_Paralel_JulianTest;
-import ai.asymmetric.PGS.SandBox.PGSmRTS_Paralel_SandBox;
-import ai.asymmetric.PGS.SandBox.PGSmRTS_SandBox;
-import ai.asymmetric.PGS.PGSmRTS;
-import ai.asymmetric.SAB.SAB;
-import ai.asymmetric.SAB.SAB_seed;
-import ai.asymmetric.SSS.NSSS;
-import ai.asymmetric.SSS.NSSSLimit;
-import ai.asymmetric.SSS.NSSSRandom;
-import ai.asymmetric.SSS.SSSIterationRandom;
-import ai.asymmetric.SSS.SSSResponseMRTS;
-import ai.asymmetric.SSS.SSSResponseMRTSRandom;
-import ai.asymmetric.SSS.SSSmRTS;
-import ai.asymmetric.SSS.SSSmRTSScriptChoice;
-import ai.asymmetric.SSS.SSSmRTSScriptChoiceRandom;
-import ai.cluster.CABA;
-import ai.cluster.CABA_Enemy;
-import ai.cluster.CIA;
-import ai.cluster.CIA_Enemy;
-import ai.cluster.CIA_EnemyEuclidieanInfluence;
-import ai.cluster.CIA_EnemyWithTime;
-import ai.cluster.CIA_PlayoutCluster;
-import ai.cluster.CIA_PlayoutPower;
-import ai.cluster.CIA_PlayoutTemporal;
-import ai.cluster.CIA_TDLearning;
-import ai.competition.capivara.Capivara;
-import ai.competition.capivara.CmabAssymetricMCTS;
-import ai.competition.tiamat.Tiamat;
-import ai.configurablescript.BasicExpandedConfigurableScript;
-import ai.configurablescript.ScriptsCreator;
-import ai.evaluation.EvaluationFunctionForwarding;
-import ai.evaluation.LTD2;
-import ai.evaluation.LanchesterEvaluationFunction;
-import ai.evaluation.PlayoutFunction;
-import ai.evaluation.SimpleSqrtEvaluationFunction3;
-import ai.mcts.naivemcts.NaiveMCTS;
-import ai.minimax.ABCD.IDABCD;
-import ai.portfolio.PortfolioAI;
-import ai.puppet.PuppetSearchMCTS;
-import ai.scv.SCVPlus;
-import gui.PhysicalGameStatePanel;
-import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.swing.JFrame;
+
+import ai.asymmetric.GAB.SandBox.PGSLimitRandom;
+import ai.configurablescript.BasicExpandedConfigurableScript;
+import ai.configurablescript.ScriptsCreator;
+import ai.core.AI;
+import gui.PhysicalGameStatePanel;
 import rts.GameState;
 import rts.PhysicalGameState;
-import rts.Player;
 import rts.PlayerAction;
-import rts.units.Unit;
-import rts.units.UnitTYpeTableBattle;
 import rts.units.UnitTypeTable;
-import static tests.ClusterTesteLeve.decodeScripts;
-import static util.SOA.RoundRobinClusterLeve.decodeScripts;
-import util.XMLWriter;
-import ai.asymmetric.GranularityPGS.*;
 
 /**
  *
@@ -108,13 +33,13 @@ public class GameVisualSimulationTest {
 		// UnitTypeTable utt = new UnitTYpeTableBattle();
 		// PhysicalGameState pgs =
 		// PhysicalGameState.load("maps/16x16/basesWorkers16x16.xml", utt);
-		PhysicalGameState pgs = PhysicalGameState.load("maps/8x8/basesWorkers8x8A.xml", utt);
+		// PhysicalGameState pgs =
+		// PhysicalGameState.load("maps/8x8/basesWorkers8x8A.xml", utt);
 		// PhysicalGameState pgs =
 		// PhysicalGameState.load("maps/16x16/basesWorkers16x16A.xml", utt);
 		// PhysicalGameState pgs =
 		// PhysicalGameState.load("maps/BWDistantResources32x32.xml", utt);
-		// PhysicalGameState pgs =
-		// PhysicalGameState.load("maps/32x32/basesWorkers32x32A.xml", utt);
+		PhysicalGameState pgs = PhysicalGameState.load("maps/32x32/basesWorkers32x32A.xml", utt);
 		// PhysicalGameState pgs =
 		// PhysicalGameState.load("maps/24x24/basesWorkers24x24A.xml", utt);
 		// PhysicalGameState pgs =
@@ -160,7 +85,7 @@ public class GameVisualSimulationTest {
 		// AI ai1 = new GranularityPGSLimitRandom(utt);
 		// AI ai1 = new GranularityPGSLimit(utt);
 		// AI ai1 = new GranularityPGSLimitRandomRB(utt);
-		//AI ai1 = new GranularityPGSLimitRB(utt);
+		// AI ai1 = new GranularityPGSLimitRB(utt);
 		AI ai1 = new GranularityPGS(utt);
 		// AI ai1 = new GAB(utt);
 		// AI ai1 = new SAB(utt);
@@ -198,8 +123,8 @@ public class GameVisualSimulationTest {
 		 * RandomBiasedAI(utt), new SimpleSqrtEvaluationFunction3(), true, utt,
 		 * "ManagerClosestEnemy", 1,decodeScripts(utt, "48;0;"));
 		 */
-		// AI ai2 = new PGSLimitRandom(utt);
-		AI ai2 = new PGSLimit(utt);
+		AI ai2 = new PGSLimitRandom(utt);
+		// AI ai2 = new PGSLimit(utt);
 		// AI ai2 = new GAB(utt);
 		// AI ai1 = new Tiamat(utt);
 		// AI ai2 = new Capivara(utt);
@@ -270,7 +195,7 @@ public class GameVisualSimulationTest {
 				startTime = System.currentTimeMillis();
 				PlayerAction pa1 = ai1.getAction(0, gs);
 				if ((System.currentTimeMillis() - startTime) > 0) {
-					//System.out.println("Tempo de execução P1=" + (startTime = System.currentTimeMillis() - startTime));
+					System.out.println("Tempo de execução P1=" + (startTime = System.currentTimeMillis() - startTime));
 				}
 				// System.out.println("Action A1 ="+ pa1.toString());
 

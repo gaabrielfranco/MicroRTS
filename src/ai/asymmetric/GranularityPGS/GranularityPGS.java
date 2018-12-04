@@ -5,10 +5,15 @@
  */
 package ai.asymmetric.GranularityPGS;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+
 import ai.RandomBiasedAI;
 import ai.abstraction.partialobservability.POHeavyRush;
 import ai.abstraction.partialobservability.POLightRush;
-import ai.abstraction.partialobservability.POLightRushV2;
 import ai.abstraction.partialobservability.PORangedRush;
 import ai.abstraction.partialobservability.POWorkerRush;
 import ai.abstraction.partialobservability.RandomScript;
@@ -21,22 +26,13 @@ import ai.core.InterruptibleAI;
 import ai.core.ParameterSpecification;
 import ai.evaluation.EvaluationFunction;
 import ai.evaluation.SimpleSqrtEvaluationFunction3;
-
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import util.Pair;
-import java.util.Comparator;
-
 //import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Collections;
 import rts.GameState;
 import rts.PlayerAction;
 import rts.UnitAction;
 import rts.units.Unit;
 import rts.units.UnitTypeTable;
+import util.Pair;
 
 /**
  *
@@ -53,7 +49,6 @@ public class GranularityPGS extends AIWithComputationBudget implements Interrupt
 	PathFinding pf;
 	int _startTime;
 
-	HashMap<Long, Set<UnitAction>> actionsAnalyzed = null;
 	HashMap<Long, List<UnitAction>> unitActionsMap = null;
 
 	public AI defaultScript = null;
@@ -90,7 +85,6 @@ public class GranularityPGS extends AIWithComputationBudget implements Interrupt
 		scripts = new ArrayList<>();
 		buildPortfolio();
 		randAI = new RandomBiasedAI(utt);
-		actionsAnalyzed = new HashMap<Long, Set<UnitAction>>();
 		unitActionsMap = new HashMap<Long, List<UnitAction>>();
 	}
 
@@ -251,20 +245,18 @@ public class GranularityPGS extends AIWithComputationBudget implements Interrupt
 
 		PlayerAction pAction = uScriptPlayer.getAction(player, gs2);
 		List<Pair<Unit, UnitAction>> unitActions = pAction.getActions();
-		//System.out.println("Antes de remover: " + unitActionsMap);
+		// System.out.println("Antes de remover: " + unitActionsMap);
 		for (Pair<Unit, UnitAction> p : unitActions) {
 			List<UnitAction> act = unitActionsMap.get(p.m_a.getID());
-			for(UnitAction a: act)
-			{
-				if (a.equals(p.m_b))
-				{
-					//System.out.println("Entrou");
+			for (UnitAction a : act) {
+				if (a.equals(p.m_b)) {
+					// System.out.println("Entrou");
 					unitActionsMap.get(p.m_a.getID()).remove(a);
 					break;
 				}
 			}
 		}
-		//System.out.println("Depoi de remover: " + unitActionsMap);
+		// System.out.println("Depoi de remover: " + unitActionsMap);
 		// gs2.issue(uScriptPlayer.getAction(player, gs2));
 		gs2.issue(pAction);
 		gs2.issue(ai2.getAction(1 - player, gs2));
@@ -406,16 +398,14 @@ public class GranularityPGS extends AIWithComputationBudget implements Interrupt
 			throws Exception {
 		int enemy = 1 - player;
 		ArrayList<Unit> unitsPlayer = getUnitsPlayer(player);
-		//Total de ações nesse estado disponíveis para cada unidade
-		for(Unit unit: unitsPlayer)
-		{
+		// Total de ações nesse estado disponíveis para cada unidade
+		for (Unit unit : unitsPlayer) {
 			unitActionsMap.put(unit.getID(), unit.getUnitActions(gs_to_start_from));
 		}
-		
+
 		UnitScriptData bestScriptData = currentScriptData.clone();
 		double bestScore = eval(player, gs_to_start_from, bestScriptData, seedEnemy);
-		
-		
+
 		int counterIterations = 0;
 		// controle pelo número de iterações
 		while (System.currentTimeMillis() < (start_time + (TIME_BUDGET - 8))) {
@@ -423,35 +413,64 @@ public class GranularityPGS extends AIWithComputationBudget implements Interrupt
 			for (Unit unit : unitsPlayer) {
 				// inserir controle de tempo
 				if (System.currentTimeMillis() >= (start_time + (TIME_BUDGET - 10))) {
+					// System.out.println(currentScriptData.toString());
+					// System.out.println("----------------------------------------------------");
 					return currentScriptData;
 				}
+
+				List<UnitAction> possibleAct = unitActionsMap.get(unit.getID());
+				if (!possibleAct.isEmpty()) {
+					int randomPos = ThreadLocalRandom.current().nextInt(0, possibleAct.size());
+					scripts.add(new RandomScript(utt, unit, possibleAct.get(randomPos)));
+					unitActionsMap.get(unit.getID()).remove(randomPos);
+				}
+
+				// System.out.println("Tam do portfolio = " + scripts.size());
+
 				// iterar sobre cada script do portfolio
 				for (AI ai : scripts) {
-					currentScriptData.setUnitScript(unit, ai);
-					double sum = 0.0;
-					for (int j = 0; j < qtdSumPlayout; j++) {
-						sum += eval(player, gs_to_start_from, currentScriptData, seedEnemy);
-					}
-					double scoreTemp = sum / qtdSumPlayout;
+					if (ai.toString().equals("RandomScript(AStarPathFinding)")) {
+						// System.out.println(((RandomScript) ai).getUnit() + " " + unit);
+						if (((RandomScript) ai).getUnit().equals(unit)) {
+							currentScriptData.setUnitScript(unit, ai);
+							double sum = 0.0;
+							for (int j = 0; j < qtdSumPlayout; j++) {
+								sum += eval(player, gs_to_start_from, currentScriptData, seedEnemy);
+							}
+							double scoreTemp = sum / qtdSumPlayout;
 
-					if (scoreTemp > bestScore) {
-						bestScriptData = currentScriptData.clone();
-						bestScore = scoreTemp;
-					}
-					if ((counterIterations == 0 && scripts.get(0) == ai) || scoreTemp > _bestScore) {
-						_bestScore = bestScore;
+							if (scoreTemp > bestScore) {
+								bestScriptData = currentScriptData.clone();
+								bestScore = scoreTemp;
+							}
+							if ((counterIterations == 0 && scripts.get(0) == ai) || scoreTemp > _bestScore) {
+								_bestScore = bestScore;
+							}
+						}
+					} else {
+						currentScriptData.setUnitScript(unit, ai);
+						double sum = 0.0;
+						for (int j = 0; j < qtdSumPlayout; j++) {
+							sum += eval(player, gs_to_start_from, currentScriptData, seedEnemy);
+						}
+						double scoreTemp = sum / qtdSumPlayout;
+
+						if (scoreTemp > bestScore) {
+							bestScriptData = currentScriptData.clone();
+							bestScore = scoreTemp;
+						}
+						if ((counterIterations == 0 && scripts.get(0) == ai) || scoreTemp > _bestScore) {
+							_bestScore = bestScore;
+						}
 					}
 				}
 				// seto o melhor vetor para ser usado em futuras simulações
 				currentScriptData = bestScriptData.clone();
 			}
-			//Adicionar os scripts aleatórios aqui
-			if(counterIterations == 0)
-			{
-				scripts.add(new RandomScript(utt, unitActionsMap));
-			}
 			counterIterations++;
 		}
+		// System.out.println(currentScriptData);
+		// System.out.println("----------------------------------------------------");
 		return currentScriptData;
 	}
 
@@ -474,13 +493,16 @@ public class GranularityPGS extends AIWithComputationBudget implements Interrupt
 		}
 		for (Unit u : currentScriptData.getUnits()) {
 			AI ai = currentScriptData.getAIUnit(u);
-
+			// System.out.println(ai);
 			UnitAction unt = actions.get(ai.toString()).getAction(u);
+
 			if (unt != null) {
 				pAction.addUnitAction(u, unt);
+			} else {
+				// System.out.println("null");
 			}
 		}
-
+		// System.out.println("----------------------------------------------------");
 		return pAction;
 	}
 
