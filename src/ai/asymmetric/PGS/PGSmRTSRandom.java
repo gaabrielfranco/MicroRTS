@@ -53,7 +53,7 @@ public class PGSmRTSRandom extends AIWithComputationBudget implements Interrupti
 	int playerForThisComputation;
 
 	AI randAI = null;
-	int qtdSumPlayout = 1;
+	int qtdSumPlayout = 2;
 
 	public PGSmRTSRandom(UnitTypeTable utt) {
 		this(100, -1, 200, 1, 1, new SimpleSqrtEvaluationFunction3(),

@@ -44,6 +44,14 @@ public class POWorkerRushV2 extends WorkerRush {
 		possibleAction = a;
 	}
 
+	public POWorkerRushV2(UnitTypeTable a_utt, PathFinding a_pf, GameState gs, Unit u, UnitAction a) {
+		super(a_utt, a_pf);
+
+		gameState = gs;
+		unit = u;
+		possibleAction = a;
+	}
+
 	public POWorkerRushV2(UnitTypeTable a_utt, PathFinding a_pf) {
 		super(a_utt, a_pf);
 	}
@@ -53,13 +61,14 @@ public class POWorkerRushV2 extends WorkerRush {
 	}
 
 	public AI clone() {
-		return new POWorkerRushV2(utt, gameState, unit, possibleAction);
+		return new POWorkerRushV2(utt, pf, gameState, unit, possibleAction);
 	}
 
 	public Unit getUnit() {
 		return unit;
 	}
 
+	@Override
 	public void meleeUnitBehavior(Unit u, Player p, GameState gs) {
 		if (unit.getID() == u.getID() && gameState.equals(gs)) {
 			addAction(u, possibleAction);
@@ -105,6 +114,7 @@ public class POWorkerRushV2 extends WorkerRush {
 		}
 	}
 
+	@Override
 	public void baseBehavior(Unit u, Player p, PhysicalGameState pgs) {
 		if (unit.getID() == u.getID() && gameState.getPhysicalGameState().equivalents(pgs)) {
 			addAction(u, possibleAction);
@@ -114,6 +124,7 @@ public class POWorkerRushV2 extends WorkerRush {
 			train(u, workerType);
 	}
 
+	@Override
 	public void workersBehavior(List<Unit> workers, Player p, GameState gs) {
 		PhysicalGameState pgs = gs.getPhysicalGameState();
 		int nbases = 0;
@@ -127,7 +138,7 @@ public class POWorkerRushV2 extends WorkerRush {
 
 		for (int i = 0; i < freeWorkers.size(); i++) {
 			Unit u = freeWorkers.get(i);
-			if (unit.getID() == u.getID() && gameState.getPhysicalGameState().equivalents(pgs)) {
+			if (unit.getID() == u.getID() && gameState.equals(gs)) {
 				addAction(u, possibleAction);
 				freeWorkers.remove(i);
 				break;

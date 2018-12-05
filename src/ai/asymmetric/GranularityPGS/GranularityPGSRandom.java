@@ -401,13 +401,6 @@ public class GranularityPGSRandom extends AIWithComputationBudget implements Int
 					return currentScriptData;
 				}
 
-				List<UnitAction> possibleAct = unitActionsMap.get(unit.getID());
-				if (!possibleAct.isEmpty()) {
-					int randomPos = ThreadLocalRandom.current().nextInt(0, possibleAct.size());
-					scripts.add(new POWorkerRushV2(utt, gs_to_start_from, unit, possibleAct.get(randomPos)));
-					unitActionsMap.get(unit.getID()).remove(randomPos);
-				}
-
 				// System.out.println("Tam do portfolio = " + scripts.size());
 
 				// iterar sobre cada script do portfolio
@@ -448,6 +441,16 @@ public class GranularityPGSRandom extends AIWithComputationBudget implements Int
 				}
 				// seto o melhor vetor para ser usado em futuras simulações
 				currentScriptData = bestScriptData.clone();
+			}
+
+			// Adicionando uma ação pra cada unidade (granularidade)
+			for (Unit unit : unitsPlayer) {
+				List<UnitAction> possibleAct = unitActionsMap.get(unit.getID());
+				if (!possibleAct.isEmpty()) {
+					int randomPos = ThreadLocalRandom.current().nextInt(0, possibleAct.size());
+					scripts.add(new POWorkerRushV2(utt, gs_to_start_from, unit, possibleAct.get(randomPos)));
+					unitActionsMap.get(unit.getID()).remove(randomPos);
+				}
 			}
 			counterIterations++;
 		}

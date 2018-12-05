@@ -44,6 +44,14 @@ public class POHeavyRushV2 extends HeavyRush {
 		possibleAction = a;
 	}
 
+	public POHeavyRushV2(UnitTypeTable a_utt, PathFinding a_pf, GameState gs, Unit u, UnitAction a) {
+		super(a_utt, a_pf);
+
+		gameState = gs;
+		unit = u;
+		possibleAction = a;
+	}
+
 	public POHeavyRushV2(UnitTypeTable a_utt, PathFinding a_pf) {
 		super(a_utt, a_pf);
 	}
@@ -53,13 +61,14 @@ public class POHeavyRushV2 extends HeavyRush {
 	}
 
 	public AI clone() {
-		return new POHeavyRushV2(utt, gameState, unit, possibleAction);
+		return new POHeavyRushV2(utt, pf, gameState, unit, possibleAction);
 	}
 
 	public Unit getUnit() {
 		return unit;
 	}
 
+	@Override
 	public void meleeUnitBehavior(Unit u, Player p, GameState gs) {
 		if (unit.getID() == u.getID() && gameState.equals(gs)) {
 			addAction(u, possibleAction);
@@ -105,6 +114,7 @@ public class POHeavyRushV2 extends HeavyRush {
 		}
 	}
 
+	@Override
 	public void baseBehavior(Unit u, Player p, PhysicalGameState pgs) {
 		if (unit.getID() == u.getID() && gameState.getPhysicalGameState().equivalents(pgs)) {
 			addAction(u, possibleAction);
@@ -133,6 +143,7 @@ public class POHeavyRushV2 extends HeavyRush {
 		}
 	}
 
+	@Override
 	public void workersBehavior(List<Unit> workers, Player p, PhysicalGameState pgs) {
 		int nbases = 0;
 		int nbarracks = 0;

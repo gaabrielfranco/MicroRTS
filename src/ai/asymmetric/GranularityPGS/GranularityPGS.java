@@ -414,91 +414,57 @@ public class GranularityPGS extends AIWithComputationBudget implements Interrupt
 						if (((POWorkerRushV2) ai).getUnit().getID() == unit.getID()) {
 							// System.out.println("Improve POWorkerRushV2");
 							currentScriptData.setUnitScript(unit, ai);
-							double sum = 0.0;
-							for (int j = 0; j < qtdSumPlayout; j++) {
-								sum += eval(player, gs_to_start_from, currentScriptData, seedEnemy);
-							}
-							double scoreTemp = sum / qtdSumPlayout;
+							double scoreTemp = eval(player, gs_to_start_from, currentScriptData, seedEnemy);
 
 							if (scoreTemp > bestScore) {
 								bestScriptData = currentScriptData.clone();
 								bestScore = scoreTemp;
-							}
-							if ((counterIterations == 0 && scripts.get(0) == ai) || scoreTemp > _bestScore) {
-								_bestScore = bestScore;
 							}
 						}
 					} else if (ai.toString().equals("POLightRushV2(AStarPathFinding)")) {
 						if (((POLightRushV2) ai).getUnit().getID() == unit.getID()) {
 							// System.out.println("Improve POLightRushV2");
 							currentScriptData.setUnitScript(unit, ai);
-							double sum = 0.0;
-							for (int j = 0; j < qtdSumPlayout; j++) {
-								sum += eval(player, gs_to_start_from, currentScriptData, seedEnemy);
-							}
-							double scoreTemp = sum / qtdSumPlayout;
+							double scoreTemp = eval(player, gs_to_start_from, currentScriptData, seedEnemy);
 
 							if (scoreTemp > bestScore) {
 								bestScriptData = currentScriptData.clone();
 								bestScore = scoreTemp;
-							}
-							if ((counterIterations == 0 && scripts.get(0) == ai) || scoreTemp > _bestScore) {
-								_bestScore = bestScore;
 							}
 						}
 					} else if (ai.toString().equals("POHeavyRushV2(AStarPathFinding)")) {
 						if (((POHeavyRushV2) ai).getUnit().getID() == unit.getID()) {
 							// System.out.println("Improve POHeavyRushV2");
 							currentScriptData.setUnitScript(unit, ai);
-							double sum = 0.0;
-							for (int j = 0; j < qtdSumPlayout; j++) {
-								sum += eval(player, gs_to_start_from, currentScriptData, seedEnemy);
-							}
-							double scoreTemp = sum / qtdSumPlayout;
+							double scoreTemp = eval(player, gs_to_start_from, currentScriptData, seedEnemy);
 
 							if (scoreTemp > bestScore) {
 								bestScriptData = currentScriptData.clone();
 								bestScore = scoreTemp;
-							}
-							if ((counterIterations == 0 && scripts.get(0) == ai) || scoreTemp > _bestScore) {
-								_bestScore = bestScore;
 							}
 						}
 					} else if (ai.toString().equals("PORangedRushV2(AStarPathFinding)")) {
 						if (((PORangedRushV2) ai).getUnit().getID() == unit.getID()) {
 							// System.out.println("Improve PORangedRushV2");
 							currentScriptData.setUnitScript(unit, ai);
-							double sum = 0.0;
-							for (int j = 0; j < qtdSumPlayout; j++) {
-								sum += eval(player, gs_to_start_from, currentScriptData, seedEnemy);
-							}
-							double scoreTemp = sum / qtdSumPlayout;
+							double scoreTemp = eval(player, gs_to_start_from, currentScriptData, seedEnemy);
 
 							if (scoreTemp > bestScore) {
 								bestScriptData = currentScriptData.clone();
 								bestScore = scoreTemp;
 							}
-							if ((counterIterations == 0 && scripts.get(0) == ai) || scoreTemp > _bestScore) {
-								_bestScore = bestScore;
-							}
 						}
 					} else {
 						currentScriptData.setUnitScript(unit, ai);
-						double sum = 0.0;
-						for (int j = 0; j < qtdSumPlayout; j++) {
-							sum += eval(player, gs_to_start_from, currentScriptData, seedEnemy);
-						}
-						double scoreTemp = sum / qtdSumPlayout;
+						double scoreTemp = eval(player, gs_to_start_from, currentScriptData, seedEnemy);
 
 						if (scoreTemp > bestScore) {
 							bestScriptData = currentScriptData.clone();
 							bestScore = scoreTemp;
 						}
-						if ((counterIterations == 0 && scripts.get(0) == ai) || scoreTemp > _bestScore) {
-							_bestScore = bestScore;
-						}
 					}
 					if ((System.currentTimeMillis() - start_time) > (TIME_BUDGET - 5)) {
+						// System.out.println("----------------------------------------------------");
 						return bestScriptData.clone();
 					}
 				}
@@ -526,6 +492,7 @@ public class GranularityPGS extends AIWithComputationBudget implements Interrupt
 					unitActionsMap.get(unit.getID()).remove(randomPos);
 				}
 			}
+			// System.out.println("Iteração " + counterIterations);
 			counterIterations++;
 		}
 		// System.out.println(currentScriptData);

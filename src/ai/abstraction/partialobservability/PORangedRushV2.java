@@ -44,6 +44,14 @@ public class PORangedRushV2 extends RangedRush {
 		possibleAction = a;
 	}
 
+	public PORangedRushV2(UnitTypeTable a_utt, PathFinding a_pf, GameState gs, Unit u, UnitAction a) {
+		super(a_utt, a_pf);
+
+		gameState = gs;
+		unit = u;
+		possibleAction = a;
+	}
+
 	public PORangedRushV2(UnitTypeTable a_utt, PathFinding a_pf) {
 		super(a_utt, a_pf);
 	}
@@ -53,13 +61,14 @@ public class PORangedRushV2 extends RangedRush {
 	}
 
 	public AI clone() {
-		return new PORangedRushV2(utt, gameState, unit, possibleAction);
+		return new PORangedRushV2(utt, pf, gameState, unit, possibleAction);
 	}
 
 	public Unit getUnit() {
 		return unit;
 	}
 
+	@Override
 	public void meleeUnitBehavior(Unit u, Player p, GameState gs) {
 		if (unit.getID() == u.getID() && gameState.equals(gs)) {
 			addAction(u, possibleAction);
@@ -106,6 +115,7 @@ public class PORangedRushV2 extends RangedRush {
 		}
 	}
 
+	@Override
 	public void baseBehavior(Unit u, Player p, PhysicalGameState pgs) {
 		if (unit.getID() == u.getID() && gameState.getPhysicalGameState().equivalents(pgs)) {
 			addAction(u, possibleAction);
@@ -123,6 +133,7 @@ public class PORangedRushV2 extends RangedRush {
 		}
 	}
 
+	@Override
 	public void barracksBehavior(Unit u, Player p, PhysicalGameState pgs) {
 		if (unit.getID() == u.getID() && gameState.getPhysicalGameState().equivalents(pgs)) {
 			addAction(u, possibleAction);
@@ -134,6 +145,7 @@ public class PORangedRushV2 extends RangedRush {
 		}
 	}
 
+	@Override
 	public void workersBehavior(List<Unit> workers, Player p, PhysicalGameState pgs) {
 		int nbases = 0;
 		int nbarracks = 0;

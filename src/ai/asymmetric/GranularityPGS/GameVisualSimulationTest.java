@@ -30,14 +30,14 @@ public class GameVisualSimulationTest {
 
 	public static void main(String args[]) throws Exception {
 		int numWins = 0;
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 29; i++) {
 			UnitTypeTable utt = new UnitTypeTable();
 			// UnitTypeTable utt = new UnitTYpeTableBattle();
 			// PhysicalGameState pgs =
 			// PhysicalGameState.load("maps/16x16/basesWorkers16x16.xml", utt);
-			PhysicalGameState pgs = PhysicalGameState.load("maps/8x8/basesWorkers8x8A.xml", utt);
 			// PhysicalGameState pgs =
-			// PhysicalGameState.load("maps/16x16/basesWorkers16x16A.xml", utt);
+			// PhysicalGameState.load("maps/8x8/basesWorkers8x8A.xml", utt);
+			PhysicalGameState pgs = PhysicalGameState.load("maps/16x16/basesWorkers16x16A.xml", utt);
 			// PhysicalGameState pgs =
 			// PhysicalGameState.load("maps/BWDistantResources32x32.xml", utt);
 			// PhysicalGameState pgs =
@@ -126,6 +126,7 @@ public class GameVisualSimulationTest {
 			 * RandomBiasedAI(utt), new SimpleSqrtEvaluationFunction3(), true, utt,
 			 * "ManagerClosestEnemy", 1,decodeScripts(utt, "48;0;"));
 			 */
+			// AI ai1 = new PGSmRTS(utt);
 			// AI ai2 = new PGSmRTSRandom(utt);
 			AI ai2 = new PGSmRTS(utt);
 			// AI ai2 = new PGSLimitRandom(utt);
@@ -146,7 +147,7 @@ public class GameVisualSimulationTest {
 			// AI ai1 = new SSSResponseMRTS(utt);
 			// AI ai2 = new NaiveMCTS(utt);
 			// AI ai2 = new CIA_TDLearning(utt);
-			// AI ai2 = new CIA_PlayoutTemporal(utt);
+			// AI ai2 = new CIA_PlayoutTempdesiresoral(utt);
 			// AI ai2 = new CIA_PlayoutPower(utt);
 			// AI ai2 = new CIA_PlayoutCluster(utt);
 			// AI ai1 = new AlphaBetaSearch(utt);
@@ -189,6 +190,10 @@ public class GameVisualSimulationTest {
 			System.out.println("---------AI's---------");
 			System.out.println("AI 1 = " + ai1.toString());
 			System.out.println("AI 2 = " + ai2.toString() + "\n");
+			System.out.println("Iteração " + i);
+
+			// 7/12 para o gPGS vs PGS
+			// 11/16 para o gPGS vs PGS
 
 			// método para fazer a troca dos players
 			JFrame w = PhysicalGameStatePanel.newVisualizer(gs, 720, 720, false,
@@ -239,7 +244,7 @@ public class GameVisualSimulationTest {
 				 * System.out.println("Player 0: Unity - " + u.toString()); } }
 				 */
 			} while (!gameover && gs.getTime() < MAXCYCLES);
-			System.out.println("Winner " + Integer.toString(gs.winner()));
+			System.out.println("Winner " + Integer.toString(gs.winner() + 1));
 			System.out.println("Game Over\n");
 			if (gs.winner() == 0) {
 				numWins++;
