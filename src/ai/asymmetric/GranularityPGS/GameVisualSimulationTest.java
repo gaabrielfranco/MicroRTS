@@ -10,6 +10,7 @@ import java.util.List;
 import javax.swing.JFrame;
 
 import ai.asymmetric.PGS.PGSmRTS;
+import ai.asymmetric.PGS.PGSmRTSRandom;
 import ai.configurablescript.BasicExpandedConfigurableScript;
 import ai.configurablescript.ScriptsCreator;
 import ai.core.AI;
@@ -30,7 +31,7 @@ public class GameVisualSimulationTest {
 
 	public static void main(String args[]) throws Exception {
 		int numWins = 0;
-		for (int i = 0; i < 29; i++) {
+		for (int i = 0; i < 40; i++) {
 			UnitTypeTable utt = new UnitTypeTable();
 			// UnitTypeTable utt = new UnitTYpeTableBattle();
 			// PhysicalGameState pgs =
@@ -88,8 +89,8 @@ public class GameVisualSimulationTest {
 			// AI ai1 = new GranularityPGSLimit(utt);
 			// AI ai1 = new GranularityPGSLimitRandomRB(utt);
 			// AI ai1 = new GranularityPGSLimitRB(utt);
-			// AI ai1 = new GranularityPGSRandom(utt);
-			AI ai1 = new GranularityPGS(utt);
+			AI ai1 = new GranularityPGSRandom(utt);
+			AI ai2 = new GranularityPGS(utt);
 			// AI ai1 = new GAB(utt);
 			// AI ai1 = new SAB(utt);
 			// AI ai1 = new IDABCD(utt);
@@ -126,9 +127,9 @@ public class GameVisualSimulationTest {
 			 * RandomBiasedAI(utt), new SimpleSqrtEvaluationFunction3(), true, utt,
 			 * "ManagerClosestEnemy", 1,decodeScripts(utt, "48;0;"));
 			 */
-			// AI ai1 = new PGSmRTS(utt);
-			// AI ai2 = new PGSmRTSRandom(utt);
-			AI ai2 = new PGSmRTS(utt);
+			//AI ai1 = new PGSmRTS(utt);
+			//AI ai2 = new PGSmRTSRandom(utt);
+			//AI ai2 = new PGSmRTS(utt);
 			// AI ai2 = new PGSLimitRandom(utt);
 			// AI ai2 = new GranularityPGSLimit(utt);
 			// AI ai2 = new PGSLimit(utt);
@@ -190,10 +191,11 @@ public class GameVisualSimulationTest {
 			System.out.println("---------AI's---------");
 			System.out.println("AI 1 = " + ai1.toString());
 			System.out.println("AI 2 = " + ai2.toString() + "\n");
-			System.out.println("Iteração " + i);
+			System.out.println("Iteração " + (i + 1));
 
 			// 7/12 para o gPGS vs PGS
 			// 11/16 para o gPGS vs PGS
+			// 5/12 para o gPGS vs PGS
 
 			// método para fazer a troca dos players
 			JFrame w = PhysicalGameStatePanel.newVisualizer(gs, 720, 720, false,
