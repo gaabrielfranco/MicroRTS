@@ -9,8 +9,6 @@ import java.util.List;
 
 import javax.swing.JFrame;
 
-import ai.asymmetric.PGS.PGSmRTS;
-import ai.asymmetric.PGS.PGSmRTSRandom;
 import ai.configurablescript.BasicExpandedConfigurableScript;
 import ai.configurablescript.ScriptsCreator;
 import ai.core.AI;
@@ -127,9 +125,9 @@ public class GameVisualSimulationTest {
 			 * RandomBiasedAI(utt), new SimpleSqrtEvaluationFunction3(), true, utt,
 			 * "ManagerClosestEnemy", 1,decodeScripts(utt, "48;0;"));
 			 */
-			//AI ai1 = new PGSmRTS(utt);
-			//AI ai2 = new PGSmRTSRandom(utt);
-			//AI ai2 = new PGSmRTS(utt);
+			// AI ai1 = new PGSmRTS(utt);
+			// AI ai2 = new PGSmRTSRandom(utt);
+			// AI ai2 = new PGSmRTS(utt);
 			// AI ai2 = new PGSLimitRandom(utt);
 			// AI ai2 = new GranularityPGSLimit(utt);
 			// AI ai2 = new PGSLimit(utt);
