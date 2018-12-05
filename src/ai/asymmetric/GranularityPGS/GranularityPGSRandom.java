@@ -6,7 +6,6 @@
 package ai.asymmetric.GranularityPGS;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -16,7 +15,7 @@ import ai.abstraction.partialobservability.POHeavyRush;
 import ai.abstraction.partialobservability.POLightRush;
 import ai.abstraction.partialobservability.PORangedRush;
 import ai.abstraction.partialobservability.POWorkerRush;
-import ai.abstraction.partialobservability.RandomScript;
+import ai.abstraction.partialobservability.POWorkerRushV2;
 import ai.abstraction.pathfinding.AStarPathFinding;
 import ai.abstraction.pathfinding.PathFinding;
 import ai.asymmetric.common.UnitScriptData;
@@ -405,7 +404,7 @@ public class GranularityPGSRandom extends AIWithComputationBudget implements Int
 				List<UnitAction> possibleAct = unitActionsMap.get(unit.getID());
 				if (!possibleAct.isEmpty()) {
 					int randomPos = ThreadLocalRandom.current().nextInt(0, possibleAct.size());
-					scripts.add(new RandomScript(utt, unit.getID(), possibleAct.get(randomPos)));
+					scripts.add(new POWorkerRushV2(utt, gs_to_start_from, unit, possibleAct.get(randomPos)));
 					unitActionsMap.get(unit.getID()).remove(randomPos);
 				}
 
@@ -413,8 +412,8 @@ public class GranularityPGSRandom extends AIWithComputationBudget implements Int
 
 				// iterar sobre cada script do portfolio
 				for (AI ai : scripts) {
-					if (ai.toString().equals("RandomScript(AStarPathFinding)")) {
-						if (((RandomScript) ai).getUnitID() == unit.getID()) {
+					if (ai.toString().equals("POWorkerRushV2(AStarPathFinding)")) {
+						if (((POWorkerRushV2) ai).getUnit().getID() == unit.getID()) {
 							currentScriptData.setUnitScript(unit, ai);
 							double sum = 0.0;
 							for (int j = 0; j < qtdSumPlayout; j++) {

@@ -5,8 +5,11 @@
  */
 package ai.asymmetric.PGS;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import ai.RandomBiasedAI;
-import ai.abstraction.WorkerHarvestRush;
 import ai.abstraction.partialobservability.POHeavyRush;
 import ai.abstraction.partialobservability.POLightRush;
 import ai.abstraction.partialobservability.PORangedRush;
@@ -20,9 +23,6 @@ import ai.core.InterruptibleAI;
 import ai.core.ParameterSpecification;
 import ai.evaluation.EvaluationFunction;
 import ai.evaluation.SimpleSqrtEvaluationFunction3;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import rts.GameState;
 import rts.PlayerAction;
 import rts.UnitAction;
@@ -35,356 +35,356 @@ import rts.units.UnitTypeTable;
  */
 public class PGSmRTSRandom extends AIWithComputationBudget implements InterruptibleAI {
 
-    int LOOKAHEAD = 200;
-    int I = 1;  // number of iterations for improving a given player
-    int R = 0;  // number of times to improve with respect to the response fo the other player
-    EvaluationFunction evaluation = null;
-    List<AI> scripts = null;
-    UnitTypeTable utt;
-    PathFinding pf;
-    int _startTime;
+	int LOOKAHEAD = 200;
+	int I = 1; // number of iterations for improving a given player
+	int R = 0; // number of times to improve with respect to the response fo the other player
+	EvaluationFunction evaluation = null;
+	List<AI> scripts = null;
+	UnitTypeTable utt;
+	PathFinding pf;
+	int _startTime;
 
-    AI defaultScript = null;
+	AI defaultScript = null;
 
-    long start_time = 0;
-    int nplayouts = 0;
+	long start_time = 0;
+	int nplayouts = 0;
 
-    GameState gs_to_start_from = null;
-    int playerForThisComputation;
-    
-    AI randAI = null;
-    int qtdSumPlayout = 1;
+	GameState gs_to_start_from = null;
+	int playerForThisComputation;
 
-    public PGSmRTSRandom(UnitTypeTable utt) {
-        this(100, -1, 200, 1, 1,
-                new SimpleSqrtEvaluationFunction3(),
-                //new SimpleSqrtEvaluationFunction2(),
-                //new LanchesterEvaluationFunction(),
-                utt,
-                new AStarPathFinding());
-    }
-    public PGSmRTSRandom(UnitTypeTable utt, int qtdPlayout, int lookahead) {
-        this(100, -1, lookahead, 1, 1,
-                new SimpleSqrtEvaluationFunction3(),
-                //new SimpleSqrtEvaluationFunction2(),
-                //new LanchesterEvaluationFunction(),
-                utt,
-                new AStarPathFinding());
-        this.qtdSumPlayout = qtdPlayout;
-    }
+	AI randAI = null;
+	int qtdSumPlayout = 1;
 
-    public PGSmRTSRandom(int time, int max_playouts, int la, int a_I, int a_R, EvaluationFunction e, UnitTypeTable a_utt, PathFinding a_pf) {
-        super(time, max_playouts);
+	public PGSmRTSRandom(UnitTypeTable utt) {
+		this(100, -1, 200, 1, 1, new SimpleSqrtEvaluationFunction3(),
+				// new SimpleSqrtEvaluationFunction2(),
+				// new LanchesterEvaluationFunction(),
+				utt, new AStarPathFinding());
+	}
 
-        LOOKAHEAD = la;
-        I = a_I;
-        R = a_R;
-        evaluation = e;
-        utt = a_utt;
-        pf = a_pf;
-        defaultScript = new POLightRush(a_utt);
-        scripts = new ArrayList<>();
-        buildPortfolio();
-        randAI = new RandomBiasedAI(a_utt);
-    }
+	public PGSmRTSRandom(UnitTypeTable utt, int qtdPlayout, int lookahead) {
+		this(100, -1, lookahead, 1, 1, new SimpleSqrtEvaluationFunction3(),
+				// new SimpleSqrtEvaluationFunction2(),
+				// new LanchesterEvaluationFunction(),
+				utt, new AStarPathFinding());
+		this.qtdSumPlayout = qtdPlayout;
+	}
 
-    protected void buildPortfolio() {
-        //this.scripts.add(new POWorkerRush(utt));
-        this.scripts.add(new WorkerHarvestRush(utt));
-        this.scripts.add(new POLightRush(utt));
-        this.scripts.add(new POHeavyRush(utt));
-        this.scripts.add(new PORangedRush(utt));
-        
-        //this.scripts.add(new EconomyMilitaryRush(utt));
-        
-        //this.scripts.add(new POHeavyRush(utt, new FloodFillPathFinding()));
-        //this.scripts.add(new POLightRush(utt, new FloodFillPathFinding()));
-        //this.scripts.add(new PORangedRush(utt, new FloodFillPathFinding()));
-    }
+	public PGSmRTSRandom(int time, int max_playouts, int la, int a_I, int a_R, EvaluationFunction e,
+			UnitTypeTable a_utt, PathFinding a_pf) {
+		super(time, max_playouts);
 
-    @Override
-    public void reset() {
+		LOOKAHEAD = la;
+		I = a_I;
+		R = a_R;
+		evaluation = e;
+		utt = a_utt;
+		pf = a_pf;
+		defaultScript = new POLightRush(a_utt);
+		scripts = new ArrayList<>();
+		buildPortfolio();
+		randAI = new RandomBiasedAI(a_utt);
+	}
 
-    }
-    
-    protected void evalPortfolio(int heightMap){
-        if(heightMap <= 16 && !portfolioHasWorkerRush()){
-            //this.scripts.add(new POWorkerRush(utt));
-        }
-    }
+	protected void buildPortfolio() {
+		// this.scripts.add(new POWorkerRush(utt));
+		this.scripts.add(new POLightRush(utt));
+		this.scripts.add(new POHeavyRush(utt));
+		this.scripts.add(new PORangedRush(utt));
+		this.scripts.add(new POWorkerRush(utt));
 
-    @Override
-    public PlayerAction getAction(int player, GameState gs) throws Exception {
-        if (gs.canExecuteAnyAction(player)) {
-            
-            //evalPortfolio(gs.getPhysicalGameState().getHeight());
-            startNewComputation(player, gs);
-            return getBestActionSoFar();
-        } else {
-            return new PlayerAction();
-        }
+		// this.scripts.add(new EconomyMilitaryRush(utt));
 
-    }
+		// this.scripts.add(new POHeavyRush(utt, new FloodFillPathFinding()));
+		// this.scripts.add(new POLightRush(utt, new FloodFillPathFinding()));
+		// this.scripts.add(new PORangedRush(utt, new FloodFillPathFinding()));
+	}
 
-    @Override
-    public PlayerAction getBestActionSoFar() throws Exception {
+	@Override
+	public void reset() {
 
-        //pego o melhor script do portfolio para ser a semente
-        AI seedPlayer = getSeedPlayer(playerForThisComputation);
-        AI seedEnemy = getSeedPlayer(1 - playerForThisComputation);
+	}
 
-        defaultScript = seedPlayer;
+	protected void evalPortfolio(int heightMap) {
+		if (heightMap <= 16 && !portfolioHasWorkerRush()) {
+			// this.scripts.add(new POWorkerRush(utt));
+		}
+	}
 
-        UnitScriptData currentScriptData = new UnitScriptData(playerForThisComputation);
-        currentScriptData.setSeedUnits(seedPlayer);
-        setAllScripts(playerForThisComputation, currentScriptData, seedPlayer);
-        if( (System.currentTimeMillis()-start_time ) < TIME_BUDGET){
-            currentScriptData = doPortfolioSearch(playerForThisComputation, currentScriptData, seedEnemy);
-        }
-        return getFinalAction(currentScriptData);
-    }
+	@Override
+	public PlayerAction getAction(int player, GameState gs) throws Exception {
+		if (gs.canExecuteAnyAction(player)) {
 
-    protected AI getSeedPlayer(int player) throws Exception {
-        AI seed = null;
-        double bestEval = -9999;
-        AI enemyAI = new POLightRush(utt);
-        //vou iterar para todos os scripts do portfolio
-        for (AI script : scripts) {
-            double tEval = eval(player, gs_to_start_from, script, enemyAI);
-            if (tEval > bestEval) {
-                bestEval = tEval;
-                seed = script;
-            }
-        }
+			// evalPortfolio(gs.getPhysicalGameState().getHeight());
+			startNewComputation(player, gs);
+			return getBestActionSoFar();
+		} else {
+			return new PlayerAction();
+		}
 
-        return seed;
-    }
+	}
 
-    /*
-    * Executa um playout de tamanho igual ao @LOOKAHEAD e retorna o valor
-     */
-    public double eval(int player, GameState gs, AI aiPlayer, AI aiEnemy) throws Exception {
-        AI ai1 = aiPlayer.clone();
-        AI ai2 = aiEnemy.clone();
+	@Override
+	public PlayerAction getBestActionSoFar() throws Exception {
 
-        GameState gs2 = gs.clone();
-        ai1.reset();
-        ai2.reset();
-        int timeLimit = gs2.getTime() + LOOKAHEAD;
-        boolean gameover = false;
-        while (!gameover && gs2.getTime() < timeLimit) {
-            if (gs2.isComplete()) {
-                gameover = gs2.cycle();
-            } else {
-                gs2.issue(ai1.getAction(player, gs2));
-                gs2.issue(ai2.getAction(1 - player, gs2));
-            }
-        }
-        double e = evaluation.evaluate(player, 1 - player, gs2);
+		// pego o melhor script do portfolio para ser a semente
+		AI seedPlayer = getSeedPlayer(playerForThisComputation);
+		AI seedEnemy = getSeedPlayer(1 - playerForThisComputation);
 
-        return e;
-    }
+		defaultScript = seedPlayer;
 
-    /**
-     * Realiza um playout (Dave playout) para calcular o improve baseado nos
-     * scripts existentes.
-     *
-     * @param player
-     * @param gs
-     * @param uScriptPlayer
-     * @param aiEnemy
-     * @return a avaliação para ser utilizada como base.
-     * @throws Exception
-     */
-    public double eval(int player, GameState gs, UnitScriptData uScriptPlayer, AI aiEnemy) throws Exception {
-        //AI ai1 = defaultScript.clone();
-        AI ai2 = aiEnemy.clone();
+		UnitScriptData currentScriptData = new UnitScriptData(playerForThisComputation);
+		currentScriptData.setSeedUnits(seedPlayer);
+		setAllScripts(playerForThisComputation, currentScriptData, seedPlayer);
+		if ((System.currentTimeMillis() - start_time) < TIME_BUDGET) {
+			currentScriptData = doPortfolioSearch(playerForThisComputation, currentScriptData, seedEnemy);
+		}
+		return getFinalAction(currentScriptData);
+	}
 
-        GameState gs2 = gs.clone();
-         //actions default
-        gs2.issue(uScriptPlayer.getAction(player, gs2));
-        gs2.issue(ai2.getAction(1 - player, gs2));
-        
-        ai2.reset();
-        int timeLimit = gs2.getTime() + LOOKAHEAD;
-        boolean gameover = false;
-        while (!gameover && gs2.getTime() < timeLimit) {
-            if (gs2.isComplete()) {
-                gameover = gs2.cycle();
-            } else {
-                gs2.issue(randAI.getAction(player, gs2));                
-                gs2.issue(randAI.getAction(1 - player, gs2));
-            }
-        }
+	protected AI getSeedPlayer(int player) throws Exception {
+		AI seed = null;
+		double bestEval = -9999;
+		AI enemyAI = new POLightRush(utt);
+		// vou iterar para todos os scripts do portfolio
+		for (AI script : scripts) {
+			double tEval = eval(player, gs_to_start_from, script, enemyAI);
+			if (tEval > bestEval) {
+				bestEval = tEval;
+				seed = script;
+			}
+		}
 
-        return evaluation.evaluate(player, 1 - player, gs2);
-    }
+		return seed;
+	}
 
-    @Override
-    public AI clone() {
-        return new PGSmRTSRandom(TIME_BUDGET, ITERATIONS_BUDGET, LOOKAHEAD, I, R, evaluation, utt, pf);
-    }
+	/*
+	 * Executa um playout de tamanho igual ao @LOOKAHEAD e retorna o valor
+	 */
+	public double eval(int player, GameState gs, AI aiPlayer, AI aiEnemy) throws Exception {
+		AI ai1 = aiPlayer.clone();
+		AI ai2 = aiEnemy.clone();
 
-    @Override
-    public List<ParameterSpecification> getParameters() {
-        List<ParameterSpecification> parameters = new ArrayList<>();
+		GameState gs2 = gs.clone();
+		ai1.reset();
+		ai2.reset();
+		int timeLimit = gs2.getTime() + LOOKAHEAD;
+		boolean gameover = false;
+		while (!gameover && gs2.getTime() < timeLimit) {
+			if (gs2.isComplete()) {
+				gameover = gs2.cycle();
+			} else {
+				gs2.issue(ai1.getAction(player, gs2));
+				gs2.issue(ai2.getAction(1 - player, gs2));
+			}
+		}
+		double e = evaluation.evaluate(player, 1 - player, gs2);
 
-        parameters.add(new ParameterSpecification("TimeBudget", int.class, 100));
-        parameters.add(new ParameterSpecification("IterationsBudget", int.class, -1));
-        parameters.add(new ParameterSpecification("PlayoutLookahead", int.class, 100));
-        parameters.add(new ParameterSpecification("I", int.class, 1));
-        parameters.add(new ParameterSpecification("R", int.class, 1));
-        parameters.add(new ParameterSpecification("EvaluationFunction", EvaluationFunction.class, new SimpleSqrtEvaluationFunction3()));
-        parameters.add(new ParameterSpecification("PathFinding", PathFinding.class, new AStarPathFinding()));
+		return e;
+	}
 
-        return parameters;
-    }
+	/**
+	 * Realiza um playout (Dave playout) para calcular o improve baseado nos scripts
+	 * existentes.
+	 *
+	 * @param player
+	 * @param gs
+	 * @param uScriptPlayer
+	 * @param aiEnemy
+	 * @return a avaliação para ser utilizada como base.
+	 * @throws Exception
+	 */
+	public double eval(int player, GameState gs, UnitScriptData uScriptPlayer, AI aiEnemy) throws Exception {
+		// AI ai1 = defaultScript.clone();
+		AI ai2 = aiEnemy.clone();
 
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + "(" + TIME_BUDGET + ", " + ITERATIONS_BUDGET + ", " + LOOKAHEAD + ", " + I + ", " + R + ", " + evaluation + ", " + pf +", "+qtdSumPlayout +")";
-    }
+		GameState gs2 = gs.clone();
+		// actions default
+		gs2.issue(uScriptPlayer.getAction(player, gs2));
+		gs2.issue(ai2.getAction(1 - player, gs2));
 
-    public int getPlayoutLookahead() {
-        return LOOKAHEAD;
-    }
+		ai2.reset();
+		int timeLimit = gs2.getTime() + LOOKAHEAD;
+		boolean gameover = false;
+		while (!gameover && gs2.getTime() < timeLimit) {
+			if (gs2.isComplete()) {
+				gameover = gs2.cycle();
+			} else {
+				gs2.issue(randAI.getAction(player, gs2));
+				gs2.issue(randAI.getAction(1 - player, gs2));
+			}
+		}
 
-    public void setPlayoutLookahead(int a_pola) {
-        LOOKAHEAD = a_pola;
-    }
+		return evaluation.evaluate(player, 1 - player, gs2);
+	}
 
-    public int getI() {
-        return I;
-    }
+	@Override
+	public AI clone() {
+		return new PGSmRTSRandom(TIME_BUDGET, ITERATIONS_BUDGET, LOOKAHEAD, I, R, evaluation, utt, pf);
+	}
 
-    public void setI(int a) {
-        I = a;
-    }
+	@Override
+	public List<ParameterSpecification> getParameters() {
+		List<ParameterSpecification> parameters = new ArrayList<>();
 
-    public int getR() {
-        return R;
-    }
+		parameters.add(new ParameterSpecification("TimeBudget", int.class, 100));
+		parameters.add(new ParameterSpecification("IterationsBudget", int.class, -1));
+		parameters.add(new ParameterSpecification("PlayoutLookahead", int.class, 100));
+		parameters.add(new ParameterSpecification("I", int.class, 1));
+		parameters.add(new ParameterSpecification("R", int.class, 1));
+		parameters.add(new ParameterSpecification("EvaluationFunction", EvaluationFunction.class,
+				new SimpleSqrtEvaluationFunction3()));
+		parameters.add(new ParameterSpecification("PathFinding", PathFinding.class, new AStarPathFinding()));
 
-    public void setR(int a) {
-        R = a;
-    }
+		return parameters;
+	}
 
-    public EvaluationFunction getEvaluationFunction() {
-        return evaluation;
-    }
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "(" + TIME_BUDGET + ", " + ITERATIONS_BUDGET + ", " + LOOKAHEAD + ", " + I
+				+ ", " + R + ", " + evaluation + ", " + pf + ", " + qtdSumPlayout + ")";
+	}
 
-    public void setEvaluationFunction(EvaluationFunction a_ef) {
-        evaluation = a_ef;
-    }
+	public int getPlayoutLookahead() {
+		return LOOKAHEAD;
+	}
 
-    public PathFinding getPathFinding() {
-        return pf;
-    }
+	public void setPlayoutLookahead(int a_pola) {
+		LOOKAHEAD = a_pola;
+	}
 
-    public void setPathFinding(PathFinding a_pf) {
-        pf = a_pf;
-    }
+	public int getI() {
+		return I;
+	}
 
-    @Override
-    public void startNewComputation(int player, GameState gs) throws Exception {
-        playerForThisComputation = player;
-        gs_to_start_from = gs;
-        nplayouts = 0;
-        _startTime = gs.getTime();
-        start_time = System.currentTimeMillis();
-    }
+	public void setI(int a) {
+		I = a;
+	}
 
-    @Override
-    public void computeDuringOneGameFrame() throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+	public int getR() {
+		return R;
+	}
 
-    private void setAllScripts(int playerForThisComputation, UnitScriptData currentScriptData, AI seedPlayer) {
-        currentScriptData.reset();
-        for (Unit u : gs_to_start_from.getUnits()) {
-            if (u.getPlayer() == playerForThisComputation) {
-                currentScriptData.setUnitScript(u, seedPlayer);
-            }
-        }
-    }
+	public void setR(int a) {
+		R = a;
+	}
 
-    private UnitScriptData doPortfolioSearch(int player, UnitScriptData currentScriptData, AI seedEnemy) throws Exception {
-        int enemy = 1 - player;
+	public EvaluationFunction getEvaluationFunction() {
+		return evaluation;
+	}
 
-        UnitScriptData bestScriptData = currentScriptData.clone();
-        double bestScore = eval(player, gs_to_start_from, bestScriptData, seedEnemy);
-        ArrayList<Unit> unitsPlayer = getUnitsPlayer(player);
-        //controle pelo número de iterações
-        //for (int i = 0; i < I; i++) {
-        while(System.currentTimeMillis() < (start_time + (TIME_BUDGET - 2))){
-            //fazer o improve de cada unidade
-            for (Unit unit : unitsPlayer) {
-                //inserir controle de tempo
-                if (System.currentTimeMillis() >= (start_time + (TIME_BUDGET - 2))) {
-                    return currentScriptData;
-                }
-                //iterar sobre cada script do portfolio
-                for (AI ai : scripts) {
-                    currentScriptData.setUnitScript(unit, ai);
-                    double sum = 0.0;
-                    for (int i = 0; i < qtdSumPlayout; i++) {
-                        sum += eval(player, gs_to_start_from, currentScriptData, seedEnemy);
-                    }
-                    double scoreTemp = sum/qtdSumPlayout;
+	public void setEvaluationFunction(EvaluationFunction a_ef) {
+		evaluation = a_ef;
+	}
 
-                    if (scoreTemp > bestScore) {
-                        bestScriptData = currentScriptData.clone();
-                        bestScore = scoreTemp;
-                    }
-                    if( (System.currentTimeMillis()-start_time ) > (TIME_BUDGET-2)){
-                        return bestScriptData.clone();
-                    }
-                }
-                //seto o melhor vetor para ser usado em futuras simulações
-                currentScriptData = bestScriptData.clone();
-            }
-        }
-        return currentScriptData;
-    }
+	public PathFinding getPathFinding() {
+		return pf;
+	}
 
-    private ArrayList<Unit> getUnitsPlayer(int player) {
-        ArrayList<Unit> unitsPlayer = new ArrayList<>();
-        for (Unit u : gs_to_start_from.getUnits()) {
-            if (u.getPlayer() == player) {
-                unitsPlayer.add(u);
-            }
-        }
+	public void setPathFinding(PathFinding a_pf) {
+		pf = a_pf;
+	}
 
-        return unitsPlayer;
-    }
+	@Override
+	public void startNewComputation(int player, GameState gs) throws Exception {
+		playerForThisComputation = player;
+		gs_to_start_from = gs;
+		nplayouts = 0;
+		_startTime = gs.getTime();
+		start_time = System.currentTimeMillis();
+	}
 
-    private PlayerAction getFinalAction(UnitScriptData currentScriptData) throws Exception {
-        PlayerAction pAction = new PlayerAction();
-        HashMap<String, PlayerAction> actions = new HashMap<>();
-        for (AI script : scripts) {
-            actions.put(script.toString(), script.getAction(playerForThisComputation, gs_to_start_from));
-        }
-        for (Unit u : currentScriptData.getUnits()) {
-            AI ai = currentScriptData.getAIUnit(u);
+	@Override
+	public void computeDuringOneGameFrame() throws Exception {
+		throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods, choose
+																		// Tools | Templates.
+	}
 
-            UnitAction unt = actions.get(ai.toString()).getAction(u);
-            if (unt != null) {
-                pAction.addUnitAction(u, unt);
-            }
-        }
-        
-        
+	private void setAllScripts(int playerForThisComputation, UnitScriptData currentScriptData, AI seedPlayer) {
+		currentScriptData.reset();
+		for (Unit u : gs_to_start_from.getUnits()) {
+			if (u.getPlayer() == playerForThisComputation) {
+				currentScriptData.setUnitScript(u, seedPlayer);
+			}
+		}
+	}
 
-        return pAction;
-    }
+	private UnitScriptData doPortfolioSearch(int player, UnitScriptData currentScriptData, AI seedEnemy)
+			throws Exception {
+		int enemy = 1 - player;
 
-    private boolean portfolioHasWorkerRush() {
-        for (AI script : scripts) {
-            if(script.toString().contains("POWorkerRush")){
-                return true;
-            }
-        }
-        return false;
-    }
+		UnitScriptData bestScriptData = currentScriptData.clone();
+		double bestScore = eval(player, gs_to_start_from, bestScriptData, seedEnemy);
+		ArrayList<Unit> unitsPlayer = getUnitsPlayer(player);
+		// controle pelo número de iterações
+		// for (int i = 0; i < I; i++) {
+		while (System.currentTimeMillis() < (start_time + (TIME_BUDGET - 2))) {
+			// fazer o improve de cada unidade
+			for (Unit unit : unitsPlayer) {
+				// inserir controle de tempo
+				if (System.currentTimeMillis() >= (start_time + (TIME_BUDGET - 2))) {
+					return currentScriptData;
+				}
+				// iterar sobre cada script do portfolio
+				for (AI ai : scripts) {
+					currentScriptData.setUnitScript(unit, ai);
+					double sum = 0.0;
+					for (int i = 0; i < qtdSumPlayout; i++) {
+						sum += eval(player, gs_to_start_from, currentScriptData, seedEnemy);
+					}
+					double scoreTemp = sum / qtdSumPlayout;
+
+					if (scoreTemp > bestScore) {
+						bestScriptData = currentScriptData.clone();
+						bestScore = scoreTemp;
+					}
+					if ((System.currentTimeMillis() - start_time) > (TIME_BUDGET - 2)) {
+						return bestScriptData.clone();
+					}
+				}
+				// seto o melhor vetor para ser usado em futuras simulações
+				currentScriptData = bestScriptData.clone();
+			}
+		}
+		return currentScriptData;
+	}
+
+	private ArrayList<Unit> getUnitsPlayer(int player) {
+		ArrayList<Unit> unitsPlayer = new ArrayList<>();
+		for (Unit u : gs_to_start_from.getUnits()) {
+			if (u.getPlayer() == player) {
+				unitsPlayer.add(u);
+			}
+		}
+
+		return unitsPlayer;
+	}
+
+	private PlayerAction getFinalAction(UnitScriptData currentScriptData) throws Exception {
+		PlayerAction pAction = new PlayerAction();
+		HashMap<String, PlayerAction> actions = new HashMap<>();
+		for (AI script : scripts) {
+			actions.put(script.toString(), script.getAction(playerForThisComputation, gs_to_start_from));
+		}
+		for (Unit u : currentScriptData.getUnits()) {
+			AI ai = currentScriptData.getAIUnit(u);
+
+			UnitAction unt = actions.get(ai.toString()).getAction(u);
+			if (unt != null) {
+				pAction.addUnitAction(u, unt);
+			}
+		}
+
+		return pAction;
+	}
+
+	private boolean portfolioHasWorkerRush() {
+		for (AI script : scripts) {
+			if (script.toString().contains("POWorkerRush")) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 }
