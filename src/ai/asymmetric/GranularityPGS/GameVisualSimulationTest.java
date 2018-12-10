@@ -26,7 +26,7 @@ public class GameVisualSimulationTest {
 
 	public static void main(String args[]) throws Exception {
 		int numWins = 0;
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 10; i++) {
 			UnitTypeTable utt = new UnitTypeTable();
 			// UnitTypeTable utt = new UnitTYpeTableBattle();
 			// PhysicalGameState pgs =

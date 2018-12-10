@@ -408,7 +408,8 @@ public class GranularityPGSRandom extends AIWithComputationBudget implements Int
 
 				// iterar sobre cada script do portfolio
 				for (AI ai : scripts) {
-					if (ai.toString().equals("POWorkerRushV2(AStarPathFinding)")) {
+					String[] aiParts = ai.toString().split(" ");
+					if (aiParts[0].equals("POWorkerRushV2(AStarPathFinding)")) {
 						if (((POWorkerRushV2) ai).getUnit().getID() == unit.getID()) {
 							currentScriptData.setUnitScript(unit, ai);
 							double sum = 0.0;
@@ -482,33 +483,43 @@ public class GranularityPGSRandom extends AIWithComputationBudget implements Int
 	}
 
 	public PlayerAction getFinalAction(UnitScriptData currentScriptData) throws Exception {
+
 		/*
 		 * PlayerAction pAction = new PlayerAction(); HashMap<String, PlayerAction>
-		 * actions = new HashMap<>(); for (AI script : scripts) { // Possível erro aqui
+		 * actions = new HashMap<>(); for (AI script : scripts) {
 		 * actions.put(script.toString(), script.getAction(playerForThisComputation,
 		 * gs_to_start_from)); } for (Unit u : currentScriptData.getUnits()) { AI ai =
-		 * currentScriptData.getAIUnit(u); // System.out.println(ai); UnitAction unt =
+		 * currentScriptData.getAIUnit(u); UnitAction unt =
 		 * actions.get(ai.toString()).getAction(u);
 		 * 
-		 * if (unt != null) { pAction.addUnitAction(u, unt); } else { //
-		 * System.out.println("null"); } } //
+		 * if (unt.equals(null)) { pAction.addUnitAction(u, unt); } else {
+		 * System.out.println("null"); } }
 		 * System.out.println("----------------------------------------------------");
 		 * return pAction;
 		 */
+
 		PlayerAction pAction = currentScriptData.getAction(playerForThisComputation, gs_to_start_from);
+
 		/*
 		 * List<Unit> units = currentScriptData.getUnits(); for (Unit u : units) { AI ai
-		 * = currentScriptData.getAIUnit(u); if
-		 * (ai.toString().equals("POWorkerRushV2(AStarPathFinding)")) {
+		 * = currentScriptData.getAIUnit(u); String[] aiParts =
+		 * ai.toString().split(" "); if
+		 * (aiParts[0].equals("POWorkerRushV2(AStarPathFinding)")) { //
 		 * System.out.println(ai.toString()); if (((POWorkerRushV2)
 		 * ai).getUnit().getID() == u.getID()) { if (((POWorkerRushV2)
 		 * ai).getPossibleAction().equals(pAction.getAction(u))) {
-		 * System.out.println("Tudo certo"); } else {
+		 * System.out.println("Tudo certo"); } else { if (pAction.getAction(u) == null
+		 * && gs_to_start_from.isUnitActionAllowed(u, ((POWorkerRushV2)
+		 * ai).getPossibleAction())) { pAction.removeUnitAction(u, null);
+		 * pAction.addUnitAction(u, ((POWorkerRushV2) ai).getPossibleAction()); } else
+		 * if (pAction.getAction(u) == null) { pAction.removeUnitAction(u, null);
+		 * pAction.addUnitAction(u, new UnitAction(UnitAction.TYPE_NONE, 10)); }
 		 * System.out.println(((POWorkerRushV2) ai).getPossibleAction() + " " +
 		 * pAction.getAction(u)); } } else { System.out.println("Errado na unidade"); }
 		 * } }
 		 * System.out.println("----------------------------------------------------");
 		 */
+
 		return pAction;
 	}
 

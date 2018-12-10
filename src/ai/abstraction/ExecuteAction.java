@@ -24,7 +24,7 @@ public class ExecuteAction extends AbstractAction {
 	public ExecuteAction(Unit u, UnitAction a) {
 		super(u);
 		type = u.getType();
-		action = a;
+		action = new UnitAction(a);
 	}
 
 	public boolean completed(GameState pgs) {
@@ -48,6 +48,6 @@ public class ExecuteAction extends AbstractAction {
 
 	public UnitAction execute(GameState gs, ResourceUsage ru) {
 		completed = true;
-		return new UnitAction(action);
+		return action;
 	}
 }

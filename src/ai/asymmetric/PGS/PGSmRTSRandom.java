@@ -374,7 +374,6 @@ public class PGSmRTSRandom extends AIWithComputationBudget implements Interrupti
 				pAction.addUnitAction(u, unt);
 			}
 		}
-
 		return pAction;
 	}
 

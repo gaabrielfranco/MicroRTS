@@ -39,17 +39,17 @@ public class POWorkerRushV2 extends WorkerRush {
 	public POWorkerRushV2(UnitTypeTable a_utt, GameState gs, Unit u, UnitAction a) {
 		this(a_utt, new AStarPathFinding());
 
-		gameState = gs;
-		unit = u;
-		possibleAction = a;
+		gameState = gs.clone();
+		unit = u.clone();
+		possibleAction = new UnitAction(a);
 	}
 
 	public POWorkerRushV2(UnitTypeTable a_utt, PathFinding a_pf, GameState gs, Unit u, UnitAction a) {
 		super(a_utt, a_pf);
 
-		gameState = gs;
-		unit = u;
-		possibleAction = a;
+		gameState = gs.clone();
+		unit = u.clone();
+		possibleAction = new UnitAction(a);
 	}
 
 	public POWorkerRushV2(UnitTypeTable a_utt, PathFinding a_pf) {
@@ -72,13 +72,18 @@ public class POWorkerRushV2 extends WorkerRush {
 		return possibleAction;
 	}
 
+	public String toString() {
+		return "POWorkerRushV2(AStarPathFinding) " + unit.getID() + " " + possibleAction.toString();
+	}
+
 	@Override
 	public void meleeUnitBehavior(Unit u, Player p, GameState gs) {
 		if (unit.getID() == u.getID() && gameState.equals(gs)) {
+			// System.out.println("Melee correto");
 			addAction(u, possibleAction);
 			return;
 		}
-
+		// System.out.println("Melee errado");
 		PhysicalGameState pgs = gs.getPhysicalGameState();
 		Unit closestEnemy = null;
 		int closestDistance = 0;
@@ -121,9 +126,11 @@ public class POWorkerRushV2 extends WorkerRush {
 	@Override
 	public void baseBehavior(Unit u, Player p, PhysicalGameState pgs) {
 		if (unit.getID() == u.getID() && gameState.getPhysicalGameState().equivalents(pgs)) {
+			// System.out.println("Base correto");
 			addAction(u, possibleAction);
 			return;
 		}
+		// System.out.println("Base errado");
 		if (p.getResources() >= workerType.cost)
 			train(u, workerType);
 	}
@@ -143,11 +150,17 @@ public class POWorkerRushV2 extends WorkerRush {
 		for (int i = 0; i < freeWorkers.size(); i++) {
 			Unit u = freeWorkers.get(i);
 			if (unit.getID() == u.getID() && gameState.equals(gs)) {
+				// System.out.println("Workers correto");
 				addAction(u, possibleAction);
 				freeWorkers.remove(i);
 				break;
 			}
 		}
+
+		if (workers.isEmpty())
+			return;
+
+		// System.out.println("Workers errado");
 
 		for (Unit u2 : pgs.getUnits()) {
 			if (u2.getType() == baseType && u2.getPlayer() == p.getID())
