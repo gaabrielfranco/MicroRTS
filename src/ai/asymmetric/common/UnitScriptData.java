@@ -13,7 +13,9 @@ import java.util.List;
 import java.util.Map;
 import rts.GameState;
 import rts.PlayerAction;
+import rts.UnitAction;
 import rts.units.Unit;
+import util.Pair;
 
 /**
  *
@@ -57,7 +59,6 @@ public class UnitScriptData {
     public PlayerAction getAction(int player, GameState gs2) throws Exception {
         HashMap<AI, PlayerAction> actions = new HashMap<>();
         PlayerAction pAction = new PlayerAction();
-
         for (AI ai : _unitScriptMap.values()) {
             actions.put(ai, ai.getAction(player, gs2));
         }
@@ -77,7 +78,12 @@ public class UnitScriptData {
 
             }
         }
-
+		List<Pair<Unit,UnitAction>> act = pAction.getActions();
+		for(Pair<Unit, UnitAction> p: act) {
+			if(p.m_b == null) {
+				System.out.println("GET_ACTION NULL");
+			}
+		}
         return pAction;
     }
     

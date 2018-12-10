@@ -376,14 +376,13 @@ public class PGSmRTSRandom extends AIWithComputationBudget implements Interrupti
 			}
 		}
 		
-		List<Pair<Unit, UnitAction>> act = pAction.getActions();
+		/*List<Pair<Unit, UnitAction>> act = pAction.getActions();
 		for(Pair<Unit, UnitAction> p: act)
 		{
-			if (p.m_b.equals(null)) {
-				System.out.println("NULL");
-			}
+			System.out.println(p.m_b);
 		}
-		System.out.println("----------------------------------------------------");
+		System.out.println("----------------------------------------------------");*/
+		
 		return pAction;
 	}
 

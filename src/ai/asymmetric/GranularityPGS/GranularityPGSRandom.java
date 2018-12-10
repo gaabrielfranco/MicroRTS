@@ -248,12 +248,13 @@ public class GranularityPGSRandom extends AIWithComputationBudget implements Int
 		for (Pair<Unit, UnitAction> p : unitActions) {
 			List<UnitAction> act = unitActionsMap.get(p.m_a.getID());
 			for (UnitAction a : act) {
+				if(p.m_b == null){
+					System.out.println("EVAL: Ação null");
+				}
 				if (a.equals(p.m_b)) {
 					// System.out.println("Entrou");
 					unitActionsMap.get(p.m_a.getID()).remove(a);
 					break;
-				}else if(p.m_b == null){
-					System.out.println("Ação null");
 				}
 			}
 		}
@@ -496,13 +497,15 @@ public class GranularityPGSRandom extends AIWithComputationBudget implements Int
 		 * System.out.println("----------------------------------------------------");
 		 * return pAction;
 		 */
-
 		PlayerAction pAction = currentScriptData.getAction(playerForThisComputation, gs_to_start_from);
-
-		
+		List<Pair<Unit,UnitAction>> act = pAction.getActions();
+		for(Pair<Unit, UnitAction> p: act) {
+			System.out.println(p.m_b);
+		}
 		 /*List<Unit> units = currentScriptData.getUnits(); 
 		 for (Unit u : units) { 
-			 AI ai = currentScriptData.getAIUnit(u); String[] aiParts = ai.toString().split(" "); 
+			 AI ai = currentScriptData.getAIUnit(u); 
+			 String[] aiParts = ai.toString().split(" "); 
 			 if (aiParts[0].equals("POWorkerRushV2(AStarPathFinding)")) {
 				 //System.out.println(ai.toString()); 
 				 if (((POWorkerRushV2)ai).getUnit().getID() == u.getID()) 
@@ -517,12 +520,16 @@ public class GranularityPGSRandom extends AIWithComputationBudget implements Int
 							pAction.removeUnitAction(u, null);
 							pAction.addUnitAction(u, new UnitAction(UnitAction.TYPE_NONE, 10)); 
 						}
-					System.out.println(((POWorkerRushV2) ai).getPossibleAction() + " " + pAction.getAction(u)); 
+					//System.out.println(((POWorkerRushV2) ai).getPossibleAction() + " " + pAction.getAction(u)); 
 					}
 				} else { 
 					//System.out.println("Errado na unidade"); 
 				}
-			 } 
+			 }
+			 else
+			 {
+				 System.out.println(ai.toString() + " " + pAction.getAction(u));
+			 }
 		}
 		System.out.println("----------------------------------------------------");
 		 
