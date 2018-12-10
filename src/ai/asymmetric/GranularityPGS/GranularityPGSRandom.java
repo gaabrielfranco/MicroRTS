@@ -482,24 +482,33 @@ public class GranularityPGSRandom extends AIWithComputationBudget implements Int
 	}
 
 	public PlayerAction getFinalAction(UnitScriptData currentScriptData) throws Exception {
-		PlayerAction pAction = new PlayerAction();
-		HashMap<String, PlayerAction> actions = new HashMap<>();
-		for (AI script : scripts) {
-			// Possível erro aqui
-			actions.put(script.toString(), script.getAction(playerForThisComputation, gs_to_start_from));
-		}
-		for (Unit u : currentScriptData.getUnits()) {
-			AI ai = currentScriptData.getAIUnit(u);
-			// System.out.println(ai);
-			UnitAction unt = actions.get(ai.toString()).getAction(u);
-
-			if (unt != null) {
-				pAction.addUnitAction(u, unt);
-			} else {
-				// System.out.println("null");
-			}
-		}
-		// System.out.println("----------------------------------------------------");
+		/*
+		 * PlayerAction pAction = new PlayerAction(); HashMap<String, PlayerAction>
+		 * actions = new HashMap<>(); for (AI script : scripts) { // Possível erro aqui
+		 * actions.put(script.toString(), script.getAction(playerForThisComputation,
+		 * gs_to_start_from)); } for (Unit u : currentScriptData.getUnits()) { AI ai =
+		 * currentScriptData.getAIUnit(u); // System.out.println(ai); UnitAction unt =
+		 * actions.get(ai.toString()).getAction(u);
+		 * 
+		 * if (unt != null) { pAction.addUnitAction(u, unt); } else { //
+		 * System.out.println("null"); } } //
+		 * System.out.println("----------------------------------------------------");
+		 * return pAction;
+		 */
+		PlayerAction pAction = currentScriptData.getAction(playerForThisComputation, gs_to_start_from);
+		/*
+		 * List<Unit> units = currentScriptData.getUnits(); for (Unit u : units) { AI ai
+		 * = currentScriptData.getAIUnit(u); if
+		 * (ai.toString().equals("POWorkerRushV2(AStarPathFinding)")) {
+		 * System.out.println(ai.toString()); if (((POWorkerRushV2)
+		 * ai).getUnit().getID() == u.getID()) { if (((POWorkerRushV2)
+		 * ai).getPossibleAction().equals(pAction.getAction(u))) {
+		 * System.out.println("Tudo certo"); } else {
+		 * System.out.println(((POWorkerRushV2) ai).getPossibleAction() + " " +
+		 * pAction.getAction(u)); } } else { System.out.println("Errado na unidade"); }
+		 * } }
+		 * System.out.println("----------------------------------------------------");
+		 */
 		return pAction;
 	}
 

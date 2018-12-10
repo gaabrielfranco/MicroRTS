@@ -471,23 +471,20 @@ public class PGSRandomBaseline extends AIWithComputationBudget implements Interr
 	}
 
 	public PlayerAction getFinalAction(UnitScriptData currentScriptData) throws Exception {
-		PlayerAction pAction = new PlayerAction();
-		HashMap<String, PlayerAction> actions = new HashMap<>();
-		for (AI script : scripts) {
-			actions.put(script.toString(), script.getAction(playerForThisComputation, gs_to_start_from));
-		}
-		for (Unit u : currentScriptData.getUnits()) {
-			AI ai = currentScriptData.getAIUnit(u);
-			// System.out.println(ai);
-			UnitAction unt = actions.get(ai.toString()).getAction(u);
-
-			if (unt != null) {
-				pAction.addUnitAction(u, unt);
-			} else {
-				// System.out.println("null");
-			}
-		}
-		// System.out.println("----------------------------------------------------");
+		/*
+		 * PlayerAction pAction = new PlayerAction(); HashMap<String, PlayerAction>
+		 * actions = new HashMap<>(); for (AI script : scripts) {
+		 * actions.put(script.toString(), script.getAction(playerForThisComputation,
+		 * gs_to_start_from)); } for (Unit u : currentScriptData.getUnits()) { AI ai =
+		 * currentScriptData.getAIUnit(u); // System.out.println(ai); UnitAction unt =
+		 * actions.get(ai.toString()).getAction(u);
+		 * 
+		 * if (unt != null) { pAction.addUnitAction(u, unt); } else { //
+		 * System.out.println("null"); } } //
+		 * System.out.println("----------------------------------------------------");
+		 * return pAction;
+		 */
+		PlayerAction pAction = currentScriptData.getAction(playerForThisComputation, gs_to_start_from);
 		return pAction;
 	}
 

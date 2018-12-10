@@ -7,7 +7,6 @@ package ai.asymmetric.GranularityPGS;
 import java.util.ArrayList;
 import java.util.List;
 
-import ai.asymmetric.PGS.PGSmRTSRandom;
 import ai.configurablescript.BasicExpandedConfigurableScript;
 import ai.configurablescript.ScriptsCreator;
 import ai.core.AI;
@@ -27,14 +26,14 @@ public class GameVisualSimulationTest {
 
 	public static void main(String args[]) throws Exception {
 		int numWins = 0;
-		for (int i = 0; i < 40; i++) {
+		for (int i = 0; i < 1; i++) {
 			UnitTypeTable utt = new UnitTypeTable();
 			// UnitTypeTable utt = new UnitTYpeTableBattle();
 			// PhysicalGameState pgs =
 			// PhysicalGameState.load("maps/16x16/basesWorkers16x16.xml", utt);
+			PhysicalGameState pgs = PhysicalGameState.load("maps/8x8/basesWorkers8x8A.xml", utt);
 			// PhysicalGameState pgs =
-			// PhysicalGameState.load("maps/8x8/basesWorkers8x8A.xml", utt);
-			PhysicalGameState pgs = PhysicalGameState.load("maps/16x16/basesWorkers16x16A.xml", utt);
+			// PhysicalGameState.load("maps/16x16/basesWorkers16x16A.xml", utt);
 			// PhysicalGameState pgs =
 			// PhysicalGameState.load("maps/BWDistantResources32x32.xml", utt);
 			// PhysicalGameState pgs =
@@ -85,8 +84,8 @@ public class GameVisualSimulationTest {
 			// AI ai1 = new GranularityPGSLimit(utt);
 			// AI ai1 = new GranularityPGSLimitRandomRB(utt);
 			// AI ai1 = new GranularityPGSLimitRB(utt);
-			// AI ai1 = new GranularityPGSRandom(utt);
-			AI ai1 = new PGSRandomBaseline(utt);
+			AI ai1 = new GranularityPGSRandom(utt);
+			AI ai2 = new PGSRandomBaseline(utt);
 			// AI ai2 = new GranularityPGS(utt);
 			// AI ai1 = new GAB(utt);
 			// AI ai1 = new SAB(utt);
@@ -125,7 +124,7 @@ public class GameVisualSimulationTest {
 			 * "ManagerClosestEnemy", 1,decodeScripts(utt, "48;0;"));
 			 */
 			// AI ai1 = new PGSmRTS(utt);
-			AI ai2 = new PGSmRTSRandom(utt);
+			// AI ai2 = new PGSmRTSRandom(utt);
 			// AI ai2 = new PGSmRTS(utt);
 			// AI ai2 = new PGSLimitRandom(utt);
 			// AI ai2 = new GranularityPGSLimit(utt);

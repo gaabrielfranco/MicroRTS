@@ -68,6 +68,10 @@ public class POWorkerRushV2 extends WorkerRush {
 		return unit;
 	}
 
+	public UnitAction getPossibleAction() {
+		return possibleAction;
+	}
+
 	@Override
 	public void meleeUnitBehavior(Unit u, Player p, GameState gs) {
 		if (unit.getID() == u.getID() && gameState.equals(gs)) {
