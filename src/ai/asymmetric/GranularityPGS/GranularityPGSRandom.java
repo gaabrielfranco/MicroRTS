@@ -61,7 +61,7 @@ public class GranularityPGSRandom extends AIWithComputationBudget implements Int
 	double _bestScore;
 
 	AI randAI = null;
-	int qtdSumPlayout = 2;
+	int qtdSumPlayout = 1;
 
 	public GranularityPGSRandom(UnitTypeTable utt) {
 		this(100, -1, 200, 1, 1, new SimpleSqrtEvaluationFunction3(),
@@ -382,8 +382,11 @@ public class GranularityPGSRandom extends AIWithComputationBudget implements Int
 		int enemy = 1 - player;
 		ArrayList<Unit> unitsPlayer = getUnitsPlayer(player);
 		// Total de ações nesse estado disponíveis para cada unidade
+		ArrayList<Integer> moda = new ArrayList<Integer>();
+
 		for (Unit unit : unitsPlayer) {
-			unitActionsMap.put(unit.getID(), unit.getUnitActions(gs_to_start_from));
+			List<UnitAction> actions = unit.getUnitActions(gs_to_start_from);
+			unitActionsMap.put(unit.getID(), actions);
 		}
 
 		UnitScriptData bestScriptData = currentScriptData.clone();
@@ -391,11 +394,11 @@ public class GranularityPGSRandom extends AIWithComputationBudget implements Int
 
 		int counterIterations = 0;
 		// controle pelo número de iterações
-		while (System.currentTimeMillis() < (start_time + (TIME_BUDGET - 8))) {
+		while (System.currentTimeMillis() < (start_time + (TIME_BUDGET - 2))) {
 			// fazer o improve de cada unidade
 			for (Unit unit : unitsPlayer) {
 				// inserir controle de tempo
-				if (System.currentTimeMillis() >= (start_time + (TIME_BUDGET - 10))) {
+				if (System.currentTimeMillis() >= (start_time + (TIME_BUDGET - 2))) {
 					// System.out.println(currentScriptData.toString());
 					// System.out.println("----------------------------------------------------");
 					return currentScriptData;
@@ -438,19 +441,27 @@ public class GranularityPGSRandom extends AIWithComputationBudget implements Int
 							_bestScore = bestScore;
 						}
 					}
+					if ((System.currentTimeMillis() - start_time) > (TIME_BUDGET - 2)) {
+						return bestScriptData.clone();
+					}
 				}
 				// seto o melhor vetor para ser usado em futuras simulações
 				currentScriptData = bestScriptData.clone();
 			}
 
 			// Adicionando uma ação pra cada unidade (granularidade)
+			boolean actionAdded = false;
 			for (Unit unit : unitsPlayer) {
 				List<UnitAction> possibleAct = unitActionsMap.get(unit.getID());
 				if (!possibleAct.isEmpty()) {
+					actionAdded = true;
 					int randomPos = ThreadLocalRandom.current().nextInt(0, possibleAct.size());
 					scripts.add(new POWorkerRushV2(utt, gs_to_start_from, unit, possibleAct.get(randomPos)));
 					unitActionsMap.get(unit.getID()).remove(randomPos);
 				}
+			}
+			if (!actionAdded) {
+				return currentScriptData;
 			}
 			counterIterations++;
 		}
@@ -474,6 +485,7 @@ public class GranularityPGSRandom extends AIWithComputationBudget implements Int
 		PlayerAction pAction = new PlayerAction();
 		HashMap<String, PlayerAction> actions = new HashMap<>();
 		for (AI script : scripts) {
+			// Possível erro aqui
 			actions.put(script.toString(), script.getAction(playerForThisComputation, gs_to_start_from));
 		}
 		for (Unit u : currentScriptData.getUnits()) {

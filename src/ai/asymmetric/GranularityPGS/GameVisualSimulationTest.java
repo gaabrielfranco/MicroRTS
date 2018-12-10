@@ -7,12 +7,10 @@ package ai.asymmetric.GranularityPGS;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JFrame;
-
+import ai.asymmetric.PGS.PGSmRTSRandom;
 import ai.configurablescript.BasicExpandedConfigurableScript;
 import ai.configurablescript.ScriptsCreator;
 import ai.core.AI;
-import gui.PhysicalGameStatePanel;
 import rts.GameState;
 import rts.PhysicalGameState;
 import rts.PlayerAction;
@@ -87,8 +85,9 @@ public class GameVisualSimulationTest {
 			// AI ai1 = new GranularityPGSLimit(utt);
 			// AI ai1 = new GranularityPGSLimitRandomRB(utt);
 			// AI ai1 = new GranularityPGSLimitRB(utt);
-			AI ai1 = new GranularityPGSRandom(utt);
-			AI ai2 = new GranularityPGS(utt);
+			// AI ai1 = new GranularityPGSRandom(utt);
+			AI ai1 = new PGSRandomBaseline(utt);
+			// AI ai2 = new GranularityPGS(utt);
 			// AI ai1 = new GAB(utt);
 			// AI ai1 = new SAB(utt);
 			// AI ai1 = new IDABCD(utt);
@@ -126,7 +125,7 @@ public class GameVisualSimulationTest {
 			 * "ManagerClosestEnemy", 1,decodeScripts(utt, "48;0;"));
 			 */
 			// AI ai1 = new PGSmRTS(utt);
-			// AI ai2 = new PGSmRTSRandom(utt);
+			AI ai2 = new PGSmRTSRandom(utt);
 			// AI ai2 = new PGSmRTS(utt);
 			// AI ai2 = new PGSLimitRandom(utt);
 			// AI ai2 = new GranularityPGSLimit(utt);
@@ -191,13 +190,9 @@ public class GameVisualSimulationTest {
 			System.out.println("AI 2 = " + ai2.toString() + "\n");
 			System.out.println("Iteração " + (i + 1));
 
-			// 7/12 para o gPGS vs PGS
-			// 11/16 para o gPGS vs PGS
-			// 5/12 para o gPGS vs PGS
-
 			// método para fazer a troca dos players
-			JFrame w = PhysicalGameStatePanel.newVisualizer(gs, 720, 720, false,
-					PhysicalGameStatePanel.COLORSCHEME_BLACK);
+			// JFrame w = PhysicalGameStatePanel.newVisualizer(gs, 720, 720, false,
+			// PhysicalGameStatePanel.COLORSCHEME_BLACK);
 			// JFrame w = PhysicalGameStatePanel.newVisualizer(gs, 720, 720, false,
 			// PhysicalGameStatePanel.COLORSCHEME_WHITE);
 			long startTime = System.currentTimeMillis();
@@ -216,8 +211,9 @@ public class GameVisualSimulationTest {
 					startTime = System.currentTimeMillis();
 					PlayerAction pa2 = ai2.getAction(1, gs);
 					if ((System.currentTimeMillis() - startTime) > 0) {
-						// System.out.println("Tempo de execução P2="+(startTime =
-						// System.currentTimeMillis() - startTime));
+						// System.out.println(
+						// "Tempo de execução P2=" + (startTime = System.currentTimeMillis() -
+						// startTime));
 					}
 					// System.out.println("Action A2 ="+ pa2.toString());
 
@@ -226,7 +222,7 @@ public class GameVisualSimulationTest {
 
 					// simulate:
 					gameover = gs.cycle();
-					w.repaint();
+					// w.repaint();
 					nextTimeToUpdate += PERIOD;
 				} else {
 					try {
