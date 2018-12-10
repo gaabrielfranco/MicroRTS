@@ -7,9 +7,13 @@ package ai.asymmetric.GranularityPGS;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JFrame;
+
+import ai.asymmetric.PGS.PGSmRTSRandom;
 import ai.configurablescript.BasicExpandedConfigurableScript;
 import ai.configurablescript.ScriptsCreator;
 import ai.core.AI;
+import gui.PhysicalGameStatePanel;
 import rts.GameState;
 import rts.PhysicalGameState;
 import rts.PlayerAction;
@@ -85,7 +89,7 @@ public class GameVisualSimulationTest {
 			// AI ai1 = new GranularityPGSLimitRandomRB(utt);
 			// AI ai1 = new GranularityPGSLimitRB(utt);
 			AI ai1 = new GranularityPGSRandom(utt);
-			AI ai2 = new PGSRandomBaseline(utt);
+			//AI ai2 = new PGSRandomBaseline(utt);
 			// AI ai2 = new GranularityPGS(utt);
 			// AI ai1 = new GAB(utt);
 			// AI ai1 = new SAB(utt);
@@ -124,7 +128,7 @@ public class GameVisualSimulationTest {
 			 * "ManagerClosestEnemy", 1,decodeScripts(utt, "48;0;"));
 			 */
 			// AI ai1 = new PGSmRTS(utt);
-			// AI ai2 = new PGSmRTSRandom(utt);
+			AI ai2 = new PGSmRTSRandom(utt);
 			// AI ai2 = new PGSmRTS(utt);
 			// AI ai2 = new PGSLimitRandom(utt);
 			// AI ai2 = new GranularityPGSLimit(utt);
@@ -190,8 +194,7 @@ public class GameVisualSimulationTest {
 			System.out.println("Iteração " + (i + 1));
 
 			// método para fazer a troca dos players
-			// JFrame w = PhysicalGameStatePanel.newVisualizer(gs, 720, 720, false,
-			// PhysicalGameStatePanel.COLORSCHEME_BLACK);
+			JFrame w = PhysicalGameStatePanel.newVisualizer(gs, 720, 720, false, PhysicalGameStatePanel.COLORSCHEME_BLACK);
 			// JFrame w = PhysicalGameStatePanel.newVisualizer(gs, 720, 720, false,
 			// PhysicalGameStatePanel.COLORSCHEME_WHITE);
 			long startTime = System.currentTimeMillis();
@@ -221,7 +224,7 @@ public class GameVisualSimulationTest {
 
 					// simulate:
 					gameover = gs.cycle();
-					// w.repaint();
+					w.repaint();
 					nextTimeToUpdate += PERIOD;
 				} else {
 					try {

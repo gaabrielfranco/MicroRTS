@@ -28,6 +28,7 @@ import rts.PlayerAction;
 import rts.UnitAction;
 import rts.units.Unit;
 import rts.units.UnitTypeTable;
+import util.Pair;
 
 /**
  *
@@ -374,6 +375,15 @@ public class PGSmRTSRandom extends AIWithComputationBudget implements Interrupti
 				pAction.addUnitAction(u, unt);
 			}
 		}
+		
+		List<Pair<Unit, UnitAction>> act = pAction.getActions();
+		for(Pair<Unit, UnitAction> p: act)
+		{
+			if (p.m_b.equals(null)) {
+				System.out.println("NULL");
+			}
+		}
+		System.out.println("----------------------------------------------------");
 		return pAction;
 	}
 

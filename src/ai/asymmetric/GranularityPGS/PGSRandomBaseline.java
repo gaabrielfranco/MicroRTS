@@ -486,24 +486,24 @@ public class PGSRandomBaseline extends AIWithComputationBudget implements Interr
 		 * return pAction;
 		 */
 		PlayerAction pAction = currentScriptData.getAction(playerForThisComputation, gs_to_start_from);
-		List<Unit> units = currentScriptData.getUnits();
+		/*List<Unit> units = currentScriptData.getUnits();
 		for (Unit u : units) {
 			AI ai = currentScriptData.getAIUnit(u);
 			String[] aiParts = ai.toString().split(" ");
 			if (aiParts[0].equals("POWorkerRushV2(AStarPathFinding)")) {
-				System.out.println(ai.toString());
+				//System.out.println(ai.toString());
 				if (((POWorkerRushV2) ai).getUnit().getID() == u.getID()) {
 					if (((POWorkerRushV2) ai).getPossibleAction().equals(pAction.getAction(u))) {
-						System.out.println("Tudo certo");
+						//System.out.println("Tudo certo");
 					} else {
-						System.out.println(((POWorkerRushV2) ai).getPossibleAction() + " " + pAction.getAction(u));
+						//System.out.println(((POWorkerRushV2) ai).getPossibleAction() + " " + pAction.getAction(u));
 					}
 				} else {
-					System.out.println("Errado na unidade");
+					//System.out.println("Errado na unidade");
 				}
 			}
-		}
-		System.out.println("----------------------------------------------------");
+		}*/
+		//System.out.println("----------------------------------------------------");
 		return pAction;
 	}
 
