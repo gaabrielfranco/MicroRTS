@@ -100,6 +100,15 @@ public class GranularityPGSRandom extends AIWithComputationBudget implements Int
 		// this.scripts.add(new PORangedRush(utt, new FloodFillPathFinding()));
 
 	}
+	
+	protected void clearPortfolio() {
+		for(int i = 0; i < scripts.size(); i++) {
+			String[] aiParts = scripts.get(i).toString().split(" ");
+			if (aiParts[0].equals("POWorkerRushV2(AStarPathFinding)")) {
+				scripts.remove(i);
+			}
+		}
+	}
 
 	@Override
 	public void reset() {
@@ -108,8 +117,9 @@ public class GranularityPGSRandom extends AIWithComputationBudget implements Int
 
 	@Override
 	public PlayerAction getAction(int player, GameState gs) throws Exception {
-		scripts.clear();
-		buildPortfolio();
+		clearPortfolio();
+		unitActionsMap.clear();
+		//System.out.println(unitActionsMap.size());
 		if (gs.canExecuteAnyAction(player)) {
 			startNewComputation(player, gs);
 			return getBestActionSoFar();

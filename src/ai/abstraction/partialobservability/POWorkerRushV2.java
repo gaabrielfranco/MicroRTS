@@ -76,7 +76,6 @@ public class POWorkerRushV2 extends WorkerRush {
 		return "POWorkerRushV2(AStarPathFinding) " + unit.getID() + " " + possibleAction.toString();
 	}
 
-	@Override
 	public void meleeUnitBehavior(Unit u, Player p, GameState gs) {
 		if (unit.getID() == u.getID() && gameState.equals(gs)) {
 			addAction(u, possibleAction);
@@ -122,7 +121,6 @@ public class POWorkerRushV2 extends WorkerRush {
 		}
 	}
 
-	@Override
 	public void baseBehavior(Unit u, Player p, PhysicalGameState pgs) {
 		if (unit.getID() == u.getID() && gameState.getPhysicalGameState().equivalents(pgs)) {
 			// System.out.println("Base correto");
@@ -134,7 +132,6 @@ public class POWorkerRushV2 extends WorkerRush {
 			train(u, workerType);
 	}
 
-	@Override
 	public void workersBehavior(List<Unit> workers, Player p, GameState gs) {
 		PhysicalGameState pgs = gs.getPhysicalGameState();
 		int nbases = 0;

@@ -35,7 +35,7 @@ public class ExecuteAction extends AbstractAction {
 		if (!(o instanceof ExecuteAction))
 			return false;
 		ExecuteAction a = (ExecuteAction) o;
-		if (type != a.type || action != a.action)
+		if (type != a.type || action != a.action || unit.getID() != a.unit.getID())
 			return false;
 
 		return true;

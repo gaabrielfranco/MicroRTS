@@ -102,6 +102,15 @@ public class PGSRandomBaseline extends AIWithComputationBudget implements Interr
 		// this.scripts.add(new PORangedRush(utt, new FloodFillPathFinding()));
 
 	}
+	
+	protected void clearPortfolio() {
+		for(int i = 0; i < scripts.size(); i++) {
+			String[] aiParts = scripts.get(i).toString().split(" ");
+			if (aiParts[0].equals("POWorkerRushV2(AStarPathFinding)")) {
+				scripts.remove(i);
+			}
+		}
+	}
 
 	@Override
 	public void reset() {
@@ -110,8 +119,9 @@ public class PGSRandomBaseline extends AIWithComputationBudget implements Interr
 
 	@Override
 	public PlayerAction getAction(int player, GameState gs) throws Exception {
-		scripts.clear();
-		buildPortfolio();
+		clearPortfolio();
+		unitActionsMap.clear();
+		//System.out.println(unitActionsMap.size());
 		if (gs.canExecuteAnyAction(player)) {
 			startNewComputation(player, gs);
 			return getBestActionSoFar();
@@ -243,18 +253,21 @@ public class PGSRandomBaseline extends AIWithComputationBudget implements Interr
 		AI ai2 = aiEnemy.clone();
 		ai2.reset();
 		GameState gs2 = gs.clone();
-
+		
 		PlayerAction pAction = uScriptPlayer.getAction(player, gs2);
-		/*
-		 * List<Pair<Unit, UnitAction>> unitActions = pAction.getActions(); //
-		 * System.out.println("Antes de remover: " + unitActionsMap); for (Pair<Unit,
-		 * UnitAction> p : unitActions) { List<UnitAction> act =
-		 * unitActionsMap.get(p.m_a.getID()); for (UnitAction a : act) { if
-		 * (a.equals(p.m_b)) { // System.out.println("Entrou");
-		 * unitActionsMap.get(p.m_a.getID()).remove(a); break; } } }
-		 */
-		// System.out.println("Depoi de remover: " + unitActionsMap);
-		// gs2.issue(uScriptPlayer.getAction(player, gs2));
+		List<Pair<Unit, UnitAction>> unitActions = pAction.getActions();
+		// System.out.println("Antes de remover: " + unitActionsMap);
+		for (Pair<Unit, UnitAction> p : unitActions) {
+			List<UnitAction> act = unitActionsMap.get(p.m_a.getID());
+			for (UnitAction a : act) {
+				if (a.equals(p.m_b)) {
+					// System.out.println("Entrou");
+					unitActionsMap.get(p.m_a.getID()).remove(a);
+					break;
+				}
+			}
+		}
+		
 		gs2.issue(pAction);
 		gs2.issue(ai2.getAction(1 - player, gs2));
 		int timeLimit = gs2.getTime() + LOOKAHEAD;
@@ -387,19 +400,6 @@ public class PGSRandomBaseline extends AIWithComputationBudget implements Interr
 		UnitScriptData bestScriptData = currentScriptData.clone();
 		double bestScore = eval(player, gs_to_start_from, bestScriptData, seedEnemy);
 
-		// Adicionando ações no portfólio
-		// int N = 5;
-		for (int i = 0; i < granularity; i++) {
-			for (Unit unit : unitsPlayer) {
-				List<UnitAction> possibleAct = unitActionsMap.get(unit.getID());
-				if (!possibleAct.isEmpty()) {
-					int randomPos = ThreadLocalRandom.current().nextInt(0, possibleAct.size());
-					scripts.add(new POWorkerRushV2(utt, gs_to_start_from, unit, possibleAct.get(randomPos)));
-					unitActionsMap.get(unit.getID()).remove(randomPos);
-				}
-			}
-		}
-
 		int counterIterations = 0;
 		// controle pelo número de iterações
 		while (System.currentTimeMillis() < (start_time + (TIME_BUDGET - 2))) {
@@ -458,6 +458,20 @@ public class PGSRandomBaseline extends AIWithComputationBudget implements Interr
 				currentScriptData = bestScriptData.clone();
 			}
 			counterIterations++;
+			
+			if (counterIterations == 1) {
+				// Adicionando ações no portfólio
+				for (int i = 0; i < granularity; i++) {
+					for (Unit unit : unitsPlayer) {
+						List<UnitAction> possibleAct = unitActionsMap.get(unit.getID());
+						if (!possibleAct.isEmpty()) {
+							int randomPos = ThreadLocalRandom.current().nextInt(0, possibleAct.size());
+							scripts.add(new POWorkerRushV2(utt, gs_to_start_from, unit, possibleAct.get(randomPos)));
+							unitActionsMap.get(unit.getID()).remove(randomPos);
+						}
+					}
+				}
+			}
 		}
 		// System.out.println(currentScriptData);
 		// System.out.println("----------------------------------------------------");
