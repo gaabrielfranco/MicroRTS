@@ -6,7 +6,6 @@
 package ai.asymmetric.PGS;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import ai.RandomBiasedAI;
@@ -25,10 +24,8 @@ import ai.evaluation.EvaluationFunction;
 import ai.evaluation.SimpleSqrtEvaluationFunction3;
 import rts.GameState;
 import rts.PlayerAction;
-import rts.UnitAction;
 import rts.units.Unit;
 import rts.units.UnitTypeTable;
-import util.Pair;
 
 /**
  *
@@ -54,7 +51,7 @@ public class PGSmRTSRandom extends AIWithComputationBudget implements Interrupti
 	int playerForThisComputation;
 
 	AI randAI = null;
-	int qtdSumPlayout = 1;
+	int qtdSumPlayout = 2;
 
 	public PGSmRTSRandom(UnitTypeTable utt) {
 		this(100, -1, 200, 1, 1, new SimpleSqrtEvaluationFunction3(),
@@ -362,27 +359,23 @@ public class PGSmRTSRandom extends AIWithComputationBudget implements Interrupti
 	}
 
 	private PlayerAction getFinalAction(UnitScriptData currentScriptData) throws Exception {
-		PlayerAction pAction = new PlayerAction();
-		HashMap<String, PlayerAction> actions = new HashMap<>();
-		for (AI script : scripts) {
-			actions.put(script.toString(), script.getAction(playerForThisComputation, gs_to_start_from));
-		}
-		for (Unit u : currentScriptData.getUnits()) {
-			AI ai = currentScriptData.getAIUnit(u);
+		/*
+		 * PlayerAction pAction = new PlayerAction(); HashMap<String, PlayerAction>
+		 * actions = new HashMap<>(); for (AI script : scripts) {
+		 * actions.put(script.toString(), script.getAction(playerForThisComputation,
+		 * gs_to_start_from)); } for (Unit u : currentScriptData.getUnits()) { AI ai =
+		 * currentScriptData.getAIUnit(u);
+		 * 
+		 * UnitAction unt = actions.get(ai.toString()).getAction(u); if (unt != null) {
+		 * pAction.addUnitAction(u, unt); } }
+		 */
 
-			UnitAction unt = actions.get(ai.toString()).getAction(u);
-			if (unt != null) {
-				pAction.addUnitAction(u, unt);
-			}
-		}
-		
-		/*List<Pair<Unit, UnitAction>> act = pAction.getActions();
-		for(Pair<Unit, UnitAction> p: act)
-		{
-			System.out.println(p.m_b);
-		}
-		System.out.println("----------------------------------------------------");*/
-		
+		/*
+		 * List<Pair<Unit, UnitAction>> act = pAction.getActions(); for(Pair<Unit,
+		 * UnitAction> p: act) { System.out.println(p.m_b); }
+		 * System.out.println("----------------------------------------------------");
+		 */
+		PlayerAction pAction = currentScriptData.getAction(playerForThisComputation, gs_to_start_from);
 		return pAction;
 	}
 

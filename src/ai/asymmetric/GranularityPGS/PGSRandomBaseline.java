@@ -31,6 +31,7 @@ import rts.PlayerAction;
 import rts.UnitAction;
 import rts.units.Unit;
 import rts.units.UnitTypeTable;
+import util.Pair;
 
 /**
  *
@@ -60,13 +61,15 @@ public class PGSRandomBaseline extends AIWithComputationBudget implements Interr
 	double _bestScore;
 
 	AI randAI = null;
-	int qtdSumPlayout = 1;
+	int qtdSumPlayout = 2;
+	int granularity = 1;
 
-	public PGSRandomBaseline(UnitTypeTable utt) {
+	public PGSRandomBaseline(UnitTypeTable utt, int g) {
 		this(100, -1, 200, 1, 1, new SimpleSqrtEvaluationFunction3(),
 				// new SimpleSqrtEvaluationFunction2(),
 				// new LanchesterEvaluationFunction(),
 				utt, new AStarPathFinding());
+		granularity = g;
 	}
 
 	public PGSRandomBaseline(int time, int max_playouts, int la, int a_I, int a_R, EvaluationFunction e,
@@ -384,8 +387,9 @@ public class PGSRandomBaseline extends AIWithComputationBudget implements Interr
 		UnitScriptData bestScriptData = currentScriptData.clone();
 		double bestScore = eval(player, gs_to_start_from, bestScriptData, seedEnemy);
 
-		// Adicionando 3 ações no portfólio
-		for (int i = 0; i < 3; i++) {
+		// Adicionando ações no portfólio
+		// int N = 5;
+		for (int i = 0; i < granularity; i++) {
 			for (Unit unit : unitsPlayer) {
 				List<UnitAction> possibleAct = unitActionsMap.get(unit.getID());
 				if (!possibleAct.isEmpty()) {
@@ -486,24 +490,28 @@ public class PGSRandomBaseline extends AIWithComputationBudget implements Interr
 		 * return pAction;
 		 */
 		PlayerAction pAction = currentScriptData.getAction(playerForThisComputation, gs_to_start_from);
-		/*List<Unit> units = currentScriptData.getUnits();
-		for (Unit u : units) {
-			AI ai = currentScriptData.getAIUnit(u);
-			String[] aiParts = ai.toString().split(" ");
-			if (aiParts[0].equals("POWorkerRushV2(AStarPathFinding)")) {
-				//System.out.println(ai.toString());
-				if (((POWorkerRushV2) ai).getUnit().getID() == u.getID()) {
-					if (((POWorkerRushV2) ai).getPossibleAction().equals(pAction.getAction(u))) {
-						//System.out.println("Tudo certo");
-					} else {
-						//System.out.println(((POWorkerRushV2) ai).getPossibleAction() + " " + pAction.getAction(u));
-					}
-				} else {
-					//System.out.println("Errado na unidade");
-				}
-			}
-		}*/
-		//System.out.println("----------------------------------------------------");
+		List<Pair<Unit, UnitAction>> act = pAction.getActions();
+		for (Pair<Unit, UnitAction> p : act) {
+			// System.out.println(currentScriptData.getAIUnit(p.m_a));
+			if (p.m_b == null)
+				System.out.println("BaselinePGS " + p.m_b);
+		}
+
+		/*
+		 * List<Unit> units = currentScriptData.getUnits(); for (Unit u : units) { AI ai
+		 * = currentScriptData.getAIUnit(u); String[] aiParts =
+		 * ai.toString().split(" "); if
+		 * (aiParts[0].equals("POWorkerRushV2(AStarPathFinding)")) {
+		 * //System.out.println(ai.toString()); if (((POWorkerRushV2)
+		 * ai).getUnit().getID() == u.getID()) { if (((POWorkerRushV2)
+		 * ai).getPossibleAction().equals(pAction.getAction(u))) {
+		 * //System.out.println("Tudo certo"); } else {
+		 * //System.out.println(((POWorkerRushV2) ai).getPossibleAction() + " " +
+		 * pAction.getAction(u)); } } else { //System.out.println("Errado na unidade");
+		 * } } }
+		 */
+
+		// System.out.println("----------------------------------------------------");
 		return pAction;
 	}
 

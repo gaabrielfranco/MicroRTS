@@ -30,14 +30,14 @@ public class GameVisualSimulationTest {
 
 	public static void main(String args[]) throws Exception {
 		int numWins = 0;
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 20; i++) {
 			UnitTypeTable utt = new UnitTypeTable();
 			// UnitTypeTable utt = new UnitTYpeTableBattle();
 			// PhysicalGameState pgs =
 			// PhysicalGameState.load("maps/16x16/basesWorkers16x16.xml", utt);
-			PhysicalGameState pgs = PhysicalGameState.load("maps/8x8/basesWorkers8x8A.xml", utt);
 			// PhysicalGameState pgs =
-			// PhysicalGameState.load("maps/16x16/basesWorkers16x16A.xml", utt);
+			// PhysicalGameState.load("maps/8x8/basesWorkers8x8A.xml", utt);
+			PhysicalGameState pgs = PhysicalGameState.load("maps/16x16/basesWorkers16x16A.xml", utt);
 			// PhysicalGameState pgs =
 			// PhysicalGameState.load("maps/BWDistantResources32x32.xml", utt);
 			// PhysicalGameState pgs =
@@ -60,7 +60,7 @@ public class GameVisualSimulationTest {
 			// PhysicalGameState.load("maps/24x24/basesWorkers24x24A.xml", utt);
 
 			GameState gs = new GameState(pgs, utt);
-			int MAXCYCLES = 8000;
+			int MAXCYCLES = 5000;
 			int PERIOD = 20;
 			boolean gameover = false;
 
@@ -88,8 +88,9 @@ public class GameVisualSimulationTest {
 			// AI ai1 = new GranularityPGSLimit(utt);
 			// AI ai1 = new GranularityPGSLimitRandomRB(utt);
 			// AI ai1 = new GranularityPGSLimitRB(utt);
-			AI ai1 = new GranularityPGSRandom(utt);
-			//AI ai2 = new PGSRandomBaseline(utt);
+			// AI ai1 = new GranularityPGSRandom(utt);
+			AI ai1 = new PGSRandomBaseline(utt, 5);
+			// AI ai2 = new PGSRandomBaseline(utt, 4);
 			// AI ai2 = new GranularityPGS(utt);
 			// AI ai1 = new GAB(utt);
 			// AI ai1 = new SAB(utt);
@@ -194,7 +195,8 @@ public class GameVisualSimulationTest {
 			System.out.println("Iteração " + (i + 1));
 
 			// método para fazer a troca dos players
-			JFrame w = PhysicalGameStatePanel.newVisualizer(gs, 720, 720, false, PhysicalGameStatePanel.COLORSCHEME_BLACK);
+			JFrame w = PhysicalGameStatePanel.newVisualizer(gs, 720, 720, false,
+					PhysicalGameStatePanel.COLORSCHEME_BLACK);
 			// JFrame w = PhysicalGameStatePanel.newVisualizer(gs, 720, 720, false,
 			// PhysicalGameStatePanel.COLORSCHEME_WHITE);
 			long startTime = System.currentTimeMillis();
