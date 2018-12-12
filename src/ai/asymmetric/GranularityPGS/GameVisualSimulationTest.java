@@ -18,7 +18,6 @@ import rts.GameState;
 import rts.PhysicalGameState;
 import rts.PlayerAction;
 import rts.units.UnitTypeTable;
-import tests.MapGenerator;
 
 /**
  *
@@ -30,33 +29,44 @@ public class GameVisualSimulationTest {
 	static AI[] strategies = null;
 
 	public static void main(String args[]) throws Exception {
-		int numWins = 0;
-		for (int i = 0; i < 20; i++) {
+		int wins = 0;
+		int losses = 0;
+		int draws = 0;
+
+		// FileWriter arq = new FileWriter(ai1.toString() + " vs " + ai2.toString() + "
+		// " + Integer.toString(i));
+		// PrintWriter gravarArq = new PrintWriter(arq);
+
+		for (int i = 0; i < 1; i++) {
 			UnitTypeTable utt = new UnitTypeTable();
 			// UnitTypeTable utt = new UnitTYpeTableBattle();
 			// PhysicalGameState pgs =
 			// PhysicalGameState.load("maps/16x16/basesWorkers16x16.xml", utt);
+			PhysicalGameState pgs = PhysicalGameState.load("maps/8x8/basesWorkers8x8A.xml", utt);
 			// PhysicalGameState pgs =
-			// PhysicalGameState.load("maps/8x8/basesWorkers8x8A.xml", utt);
-			//PhysicalGameState pgs = PhysicalGameState.load("maps/16x16/basesWorkers16x16A.xml", utt);
+			// PhysicalGameState.load("maps/16x16/basesWorkers16x16A.xml", utt);
 			// PhysicalGameState pgs =
 			// PhysicalGameState.load("maps/BWDistantResources32x32.xml", utt);
 			// PhysicalGameState pgs =
 			// PhysicalGameState.load("maps/32x32/basesWorkers32x32A.xml", utt);
 			// PhysicalGameState pgs =
 			// PhysicalGameState.load("maps/24x24/basesWorkers24x24A.xml", utt);
-			//PhysicalGameState pgs = PhysicalGameState.load("maps/BroodWar/(4)BloodBath.scmB.xml", utt);
-			PhysicalGameState pgs = PhysicalGameState.load("maps/8x8/FourBasesWorkers8x8.xml", utt);
+			// PhysicalGameState pgs =
+			// PhysicalGameState.load("maps/BroodWar/(4)BloodBath.scmB.xml", utt);
+			// PhysicalGameState pgs =
+			// PhysicalGameState.load("maps/8x8/FourBasesWorkers8x8.xml", utt);
 			// PhysicalGameState pgs =
 			// PhysicalGameState.load("maps/16x16/TwoBasesBarracks16x16.xml", utt);
-			//PhysicalGameState pgs = PhysicalGameState.load("maps/NoWhereToRun9x8.xml", utt);
+			// PhysicalGameState pgs = PhysicalGameState.load("maps/NoWhereToRun9x8.xml",
+			// utt);
 			// PhysicalGameState pgs = PhysicalGameState.load("maps/DoubleGame24x24.xml",
 			// utt);
-			//PhysicalGameState pgs = MapGenerator.basesWorkers8x8Obstacle();
+			// PhysicalGameState pgs = MapGenerator.basesWorkers8x8Obstacle();
 			// testes
 			// PhysicalGameState pgs =
 			// PhysicalGameState.load("maps/24x24/basesWorkers24x24A.xml", utt);
-			//PhysicalGameState pgs = PhysicalGameState.load("maps/8x8/ThreeBasesWorkers8x8.xml", utt);
+			// PhysicalGameState pgs =
+			// PhysicalGameState.load("maps/8x8/ThreeBasesWorkers8x8.xml", utt);
 
 			GameState gs = new GameState(pgs, utt);
 			int MAXCYCLES = 5000;
@@ -88,8 +98,8 @@ public class GameVisualSimulationTest {
 			// AI ai1 = new GranularityPGSLimitRandomRB(utt);
 			// AI ai1 = new GranularityPGSLimitRB(utt);
 			AI ai1 = new GranularityPGSRandom(utt);
-			//AI ai1 = new PGSRandomBaseline(utt, 3);
-			//AI ai2 = new PGSRandomBaseline(utt, 5);
+			// AI ai1 = new PGSRandomBaseline(utt, 3);
+			// AI ai2 = new PGSRandomBaseline(utt, 5);
 			// AI ai2 = new GranularityPGS(utt);
 			// AI ai1 = new GAB(utt);
 			// AI ai1 = new SAB(utt);
@@ -187,11 +197,15 @@ public class GameVisualSimulationTest {
 			// AI ai2 = new PVAIML_EDP(utt);
 			// AI ai2 = new PVAIML_SLFWMS(utt);
 			// AI ai2 = new PVAICluster(4, utt, "EconomyRush(AStarPathFinding)");
+			// gravarArq.printf("---------AI's---------\n");
+			// gravarArq.printf("AI 0 = " + ai1.toString() + "\n");
+			// gravarArq.printf("AI 1 = " + ai2.toString() + "\n\n");
+			// gravarArq.printf("Iteração " + (i + 1) + "\n");
 
-			System.out.println("---------AI's---------");
-			System.out.println("AI 0 = " + ai1.toString());
-			System.out.println("AI 1 = " + ai2.toString() + "\n");
-			System.out.println("Iteração " + (i + 1));
+			// System.out.println("---------AI's---------");
+			// System.out.println("AI 0 = " + ai1.toString());
+			// System.out.println("AI 1 = " + ai2.toString() + "\n");
+			// System.out.println("Iteração " + (i + 1));
 
 			// método para fazer a troca dos players
 			JFrame w = PhysicalGameStatePanel.newVisualizer(gs, 720, 720, false,
@@ -205,18 +219,18 @@ public class GameVisualSimulationTest {
 					startTime = System.currentTimeMillis();
 					PlayerAction pa1 = ai1.getAction(0, gs);
 					if ((System.currentTimeMillis() - startTime) > 0) {
-						//System.out.println(
-						//"Tempo de execução P1=" + (startTime = System.currentTimeMillis() -
-						//startTime));
+						// System.out.println(
+						// "Tempo de execução P1=" + (startTime = System.currentTimeMillis() -
+						// startTime));
 					}
 					// System.out.println("Action A1 ="+ pa1.toString());
 
 					startTime = System.currentTimeMillis();
 					PlayerAction pa2 = ai2.getAction(1, gs);
 					if ((System.currentTimeMillis() - startTime) > 0) {
-						//System.out.println(
-						//"Tempo de execução P2=" + (startTime = System.currentTimeMillis() -
-						//startTime));
+						// System.out.println(
+						// "Tempo de execução P2=" + (startTime = System.currentTimeMillis() -
+						// startTime));
 					}
 					// System.out.println("Action A2 ="+ pa2.toString());
 
@@ -246,10 +260,14 @@ public class GameVisualSimulationTest {
 			System.out.println("Winner " + Integer.toString(gs.winner()));
 			System.out.println("Game Over\n");
 			if (gs.winner() == 0) {
-				numWins++;
+				wins++;
+			} else if (gs.winner() == 1) {
+				losses++;
+			} else {
+				draws++;
 			}
 		}
-		System.out.println("Total de vitórias = " + numWins);
+		System.out.println("V/E/D = " + wins + "/" + draws + "/" + losses);
 	}
 
 	public static List<AI> decodeScripts(UnitTypeTable utt, String sScripts) {

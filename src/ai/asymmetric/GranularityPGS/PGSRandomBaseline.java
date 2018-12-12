@@ -102,9 +102,9 @@ public class PGSRandomBaseline extends AIWithComputationBudget implements Interr
 		// this.scripts.add(new PORangedRush(utt, new FloodFillPathFinding()));
 
 	}
-	
+
 	protected void clearPortfolio() {
-		for(int i = 0; i < scripts.size(); i++) {
+		for (int i = 0; i < scripts.size(); i++) {
 			String[] aiParts = scripts.get(i).toString().split(" ");
 			if (aiParts[0].equals("POWorkerRushV2(AStarPathFinding)")) {
 				scripts.remove(i);
@@ -121,7 +121,7 @@ public class PGSRandomBaseline extends AIWithComputationBudget implements Interr
 	public PlayerAction getAction(int player, GameState gs) throws Exception {
 		clearPortfolio();
 		unitActionsMap.clear();
-		//System.out.println(unitActionsMap.size());
+		// System.out.println(unitActionsMap.size());
 		if (gs.canExecuteAnyAction(player)) {
 			startNewComputation(player, gs);
 			return getBestActionSoFar();
@@ -253,7 +253,7 @@ public class PGSRandomBaseline extends AIWithComputationBudget implements Interr
 		AI ai2 = aiEnemy.clone();
 		ai2.reset();
 		GameState gs2 = gs.clone();
-		
+
 		PlayerAction pAction = uScriptPlayer.getAction(player, gs2);
 		List<Pair<Unit, UnitAction>> unitActions = pAction.getActions();
 		// System.out.println("Antes de remover: " + unitActionsMap);
@@ -267,7 +267,7 @@ public class PGSRandomBaseline extends AIWithComputationBudget implements Interr
 				}
 			}
 		}
-		
+
 		gs2.issue(pAction);
 		gs2.issue(ai2.getAction(1 - player, gs2));
 		int timeLimit = gs2.getTime() + LOOKAHEAD;
@@ -308,7 +308,7 @@ public class PGSRandomBaseline extends AIWithComputationBudget implements Interr
 	@Override
 	public String toString() {
 		return getClass().getSimpleName() + "(" + TIME_BUDGET + ", " + ITERATIONS_BUDGET + ", " + LOOKAHEAD + ", " + I
-				+ ", " + R + ", " + evaluation + ", " + pf + ")";
+				+ ", " + R + ", " + evaluation + ", " + pf + ", " + granularity + ")";
 	}
 
 	public int getPlayoutLookahead() {
@@ -458,7 +458,7 @@ public class PGSRandomBaseline extends AIWithComputationBudget implements Interr
 				currentScriptData = bestScriptData.clone();
 			}
 			counterIterations++;
-			
+
 			if (counterIterations == 1) {
 				// Adicionando ações no portfólio
 				for (int i = 0; i < granularity; i++) {
